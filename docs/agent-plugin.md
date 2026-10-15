@@ -4,6 +4,8 @@ The `builder` plugin provides one customer-facing skill, `app-service-builder`, 
 
 Plugin distribution does not grant preview access or announce public service availability. It is a repository-hosted marketplace, not admission to a curated plugin directory.
 
+This public repository is the maintained customer skill home. The Builder CLI owns executable proposal/render/repair/validation logic; it is not a second skill distribution route and does not require a private checkout. Install the customer skill through the marketplace below, not an additional CLI-bundled installer.
+
 ## Install the plugin
 
 Use an installed host that supports plugins. The following repository-based commands work once this package is merged into the repository's default branch; a draft PR is not a published marketplace release.
@@ -39,6 +41,8 @@ The [canonical product docs](https://builder.appservice.azure.com/docs/) and [cu
 
 The [skill](../plugin/skills/app-service-builder/SKILL.md) includes self-contained [readiness](../plugin/skills/app-service-builder/references/prerequisites.md), [source](../plugin/skills/app-service-builder/references/source-and-manifest.md), [deployment](../plugin/skills/app-service-builder/references/deployment.md), and [operations](../plugin/skills/app-service-builder/references/operations.md) references. Unsupported or unqualified workflows must not be inferred from the existence of this plugin.
 
+Manifest proposal/generation/repair/validation is capability-gated: check installed CLI and command-specific help, including required flags. An approved CLI build with this capability and qualified OS/CPU packaging is still required; this package does not establish a release version or universal availability. Samples inform source layout and user choices, while the CLI renders and validates the actual manifest. If the capability is missing, read-only source inspection can help but must not become hand-written manifest generation or a replacement detector.
+
 ## Package layout and local checks
 
 Both hosts read the same `plugin/skills/` tree. Copilot's entry point is `plugin/plugin.json`; Claude Code's is `plugin/.claude-plugin/plugin.json`. Keep those manifests identical. A single catalog at `.claude-plugin/marketplace.json` is supported by both hosts, so there is no duplicate catalog to drift.
@@ -50,7 +54,7 @@ node --test scripts/validate-plugin.test.mjs
 node scripts/validate-plugin.mjs
 ```
 
-These offline checks validate the deliberately small manifest schema, required metadata, version agreement, contained relative paths, both entry points, the single skill's frontmatter, local Markdown links, bundled references, canonical product documentation destinations, and installation-placeholder guardrails. Focused safety assertions protect source preservation, read-only reconciliation, and the CLI commit-selector distinction; they are not a semantic safety proof. Negative tests exercise broken metadata, paths, references, documentation destinations, and unsafe edits. They do not run `builder`, fetch sample source, validate live doc content/service access, or prove a deployment works.
+These offline checks validate the deliberately small manifest schema, required metadata, version agreement, contained relative paths, both entry points, the single skill's frontmatter, local Markdown links, bundled references, canonical product documentation destinations, and installation-placeholder guardrails. Focused safety assertions protect source preservation, read-only reconciliation, CLI commit selection, and capability-gated deterministic manifest guidance; they are not a semantic safety proof or new-CLI runtime smoke test. Negative tests exercise broken metadata, paths, references, documentation destinations, and unsafe edits. They do not run `builder`, fetch sample source, validate live doc content/service access, or prove a deployment works.
 
 If Claude Code is already available, `claude plugin validate ./plugin` and `claude plugin validate .` provide additional native manifest validation. Native discovery should be checked using isolated temporary host configuration, not by installing into a contributor's global configuration. Record the host/version and actual result in the PR; missing hosts or live preview checks remain explicit gaps.
 

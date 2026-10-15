@@ -12,6 +12,14 @@ Require local Node.js >=22, Git, and GitHub CLI (`gh`). If a prerequisite is abs
 
 The preview contact must supply authorization for the subscription and the approved location and connection settings. Use an **existing resource group**. This skill does not invent onboarding, regions, endpoints, platform qualifications, or commands for configuring preview connections.
 
+## Manifest capability gate
+
+The manifest workflow described in [source preparation](source-and-manifest.md#cli-owned-manifest-workflow) requires an approved CLI build with that capability. Its availability and OS/CPU package readiness are pending; do not invent a minimum released version or claim universal shipping support. Check `builder --help`, then `builder manifest --help` if listed, and the relevant `propose`, `generate`, `repair`, and `validate` command help before invocation. Verify flags as well as command names. Public docs remain support/availability authority; installed help is command syntax authority. Surface any mismatch rather than proceeding on assumptions.
+
+If commands or flags are absent, explain that this workflow needs an approved capable CLI build and stop manifest generation/repair. Read-only app/sample inspection can still help; do not bypass deterministic rendering with hand-written YAML or a replacement framework detector. The native repository analyzer is supplied with a capable CLI on supported OS/CPU combinations; it does not require customer .NET or a separately installed analyzer. Missing native prerequisites/errors must be reported, not solved with guessed installers.
+
+Proposal, rendering previews, repair previews, and plan validation are local. Only optional build validation executes repository build scripts; it needs separate execution approval. Neither mode proves preview runtime qualification or hosted success.
+
 ## Read-only readiness checks
 
 Local code and manifest inspection does not require Git initialization, sign-in, or a source connection. Do not create a repository or connect accounts just to read files. For cloud work, inspect local tooling and account state in the deliberately selected checkout:

@@ -114,6 +114,13 @@ test('rejects removing the CLI installation placeholder', (t) => {
   assert.throws(() => validatePlugin(directory), /Missing CLI installation placeholder/);
 });
 
+test('rejects a duplicate CLI skill installer in installation docs', (t) => {
+  const directory = fixture(t);
+  const path = resolve(directory, 'docs/agent-plugin.md');
+  writeFileSync(path, readFileSync(path, 'utf8') + '\nRun builder skills install.\n');
+  assert.throws(() => validatePlugin(directory), /Duplicate skill installer/);
+});
+
 const skillRoot = 'plugin/skills/app-service-builder/';
 const unsafeGuidance = [
   ['noncanonical docs host', 'SKILL.md',
@@ -168,6 +175,50 @@ const unsafeGuidance = [
     'static Vite sample is not a TypeScript web-runtime guarantee', 'static Vite guarantees a web runtime', /static runtime distinction/],
   ['retired sample path', 'references/source-and-manifest.md',
     '## Combined shape', 'Use samples/nodejs-web as the app root.\n\n## Combined shape', /Retired sample distribution path/],
+  ['removed public ownership', 'SKILL.md',
+    'public repository is the maintained customer skill home', 'CLI checkout owns this skill', /public skill ownership/],
+  ['removed manifest capability discovery', 'references/prerequisites.md',
+    'builder manifest --help', 'builder config --help', /manifest capability discovery/],
+  ['missing capability fallback', 'references/prerequisites.md',
+    'If commands or flags are absent', 'Whether commands exist or not', /missing manifest capability/],
+  ['standalone analyzer prerequisite', 'references/prerequisites.md',
+    'does not require customer .NET or a separately installed analyzer', 'requires a customer analyzer installation', /bundled analyzer prerequisite/],
+  ['agent manifest fallback', 'references/source-and-manifest.md',
+    'never substitute agent-written YAML or a second framework detector', 'write YAML using your own detector', /deterministic manifest authority/],
+  ['samples replacing rendering', 'references/source-and-manifest.md',
+    'Samples inform app layout and unresolved user choices, while the CLI renders and validates the actual manifest',
+    'Copy the sample YAML directly', /sample renderer coexistence/],
+  ['exit zero treated as proposal readiness', 'references/source-and-manifest.md',
+    '`needsReview` can exit 0; `blocked` exits 1', 'Exit zero is always ready', /proposal readiness versus exit/],
+  ['unbounded resolution overrides', 'references/source-and-manifest.md',
+    'only `candidateId`, `name`, `publicPath`, `build`, and `start`', 'arbitrary fields', /bounded JSON resolution/],
+  ['stale proposal write ID', 'references/source-and-manifest.md',
+    '--write --proposal-id "<same-proposal-id>"', '--write --proposal-id "<invented-id>"', /Missing manifest workflow command/],
+  ['missing manifest write approval', 'references/source-and-manifest.md',
+    'obtain explicit approval before writing', 'write immediately', /preview\/diff approval/],
+  ['repair preview exit misclassification', 'references/source-and-manifest.md',
+    'safe-change preview exits 1; `noChanges` exits 0', 'all exit 1 results are fatal', /repair readiness versus exit/],
+  ['missing repair write ID', 'references/source-and-manifest.md',
+    '--write --repair-id "<repair-id>"', '--write', /Missing manifest workflow command/],
+  ['repair identity scope removed', 'references/source-and-manifest.md',
+    'Repair `--write` requires `--repair-id`; `--repair-id` without `--write` is invalid',
+    'Any repair ID is optional', /repair write identity/],
+  ['stale repair bypass', 'references/source-and-manifest.md',
+    'Stale input must be re-previewed, not bypassed', 'Ignore stale repair input', /stale repair protection/],
+  ['validator bypass', 'references/source-and-manifest.md',
+    'Do not hand-edit around rejected validators or disable checks', 'Disable checks to proceed', /validator bypass protection/],
+  ['missing analyzer failure envelope', 'references/source-and-manifest.md',
+    'BuilderAnalyzerFailed', 'AlwaysReady', /analyzer error envelope/],
+  ['unapproved build execution', 'references/source-and-manifest.md',
+    'Docker/Oryx: explain the execution and obtain approval first', 'Docker/Oryx: execute immediately', /manifest build consent/],
+  ['init proceeding after manifest write', 'references/deployment.md',
+    'If init writes the manifest, it stops', 'If init writes the manifest, it deploys immediately', /init review publication rerun/],
+  ['yes approving manifest creation', 'references/deployment.md',
+    'Noninteractive `--yes` cannot approve manifest creation/repair', 'Noninteractive --yes approves all writes', /init noninteractive manifest scope/],
+  ['dirty init worktree allowed', 'references/deployment.md',
+    'manifest tracked, the entire worktree clean', 'manifest tracked with dirty work ignored', /init source gates/],
+  ['duplicate skill installation route', 'SKILL.md',
+    '## Before acting', 'Run builder skills install first.\n\n## Before acting', /Duplicate skill installer/],
 ];
 
 for (const [name, path, before, after, expected] of unsafeGuidance) {

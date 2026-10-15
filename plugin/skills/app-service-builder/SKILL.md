@@ -7,6 +7,8 @@ description: "Use for explicit App Service Builder requests: prepare builder.yam
 
 Help authorized customers use the `builder` CLI for **Private Preview development/test**, not production. Plugin installation does not grant preview access, install the CLI, qualify a location, or make the service publicly available.
 
+This public repository is the maintained customer skill home; the CLI supplies executable manifest analysis/rendering/validation, not a second skill installation route. No private checkout is required.
+
 ## Before acting
 
 Use the [canonical product documentation](https://builder.appservice.azure.com/docs/) and check [current feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) before recommending a workflow. Maintained docs govern support, prerequisites, and limitations; bundled references provide procedure; installed CLI help verifies actual syntax. If docs and help disagree, surface the mismatch and do not guess. If docs cannot be fetched, disclose the gap and do not promote unqualified features. Public docs do not make the platform publicly available.
@@ -22,13 +24,15 @@ Use the [canonical product documentation](https://builder.appservice.azure.com/d
 | Task | Read before executing |
 | --- | --- |
 | Check access, CLI readiness, and source authorization | [Prerequisites and readiness](references/prerequisites.md) |
-| Prepare an app or `builder.yaml`, optionally using a matching sample's structure | [Source and manifest](references/source-and-manifest.md) |
+| Prepare app layout using optional samples; capability-check CLI manifest proposal, rendering, repair, and validation | [Source and manifest](references/source-and-manifest.md) |
 | Initialize, deploy, and verify the serving app | [Deployment](references/deployment.md) |
 | Inspect failures/history, recover, or delete | [Operations](references/operations.md) |
 
 Read the relevant reference in full. All command examples have descriptive placeholders: replace them only with user-confirmed or verified values; never execute angle-bracket values literally. Use `builder --help` and command-specific help to check the installed CLI before using options. Do not invent missing commands.
 
 For a starting point, detect the existing framework/runtime and static versus HTTP shape first. Use the [published sample catalog](https://builder.appservice.azure.com/docs/samples/) for context and the verified public examples in the source reference; inspect the selected sample's current README, root `builder.yaml`, and relevant project/startup/health files before proposing small adaptations. Preserve existing source instead of requiring a fork. Source examples do not override current availability warnings.
+
+Before manifest commands, check installed help for the capability; distribution readiness is pending, not universal. The CLI renders and validates the actual manifest: do not hand-write YAML or implement a replacement detector if that capability is absent. Read proposal/repair JSON, preview the exact output/diff, and obtain approval before writes or build execution.
 
 ## Boundaries and completion
 

@@ -8,6 +8,10 @@ Consult maintained [deployments and versions](https://builder.appservice.azure.c
 
 Read `builder init --help`, then use the selected pushed source and approved preview location:
 
+For a CLI build with the [manifest capability](prerequisites.md#manifest-capability-gate), `init` validates or interactively proposes/repairs `builder.yaml` before authentication or cloud work. If init writes the manifest, it stops: review `git diff`, obtain approval to commit and push the intended changes, then rerun init. Noninteractive `--yes` cannot approve manifest creation/repair. Do not automatically commit/push, discard dirty work, or call that early stop successful cloud setup/deployment.
+
+This init flow requires the manifest tracked, the entire worktree clean, the selected `github.com` origin and branch matching intended source, and local HEAD equal to the pushed branch tip. It rechecks before cloud mutation. If any gate fails, preserve unrelated work and resolve only within user-approved scope; do not reset/stash/change branches or accounts to force the check through. A valid local plan remains distinct from source publication, setup, and deployment.
+
 ```shell
 builder init "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --location "<qualified-location>" --repository "<owner>/<repository>" --branch "<branch>"
 ```

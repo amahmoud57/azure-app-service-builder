@@ -68,11 +68,43 @@ function checkGuidance(skillRoot) {
     ['references/operations.md', /Reconciliation is read-only[^.]*must not implicitly resume writes/i, 'read-only reconciliation'],
     ['references/operations.md', /changed intent needs a new ID/i, 'retry intent'],
     ['references/operations.md', /Do not promise universal cancellation/i, 'cancellation uncertainty'],
+    ['SKILL.md', /public repository is the maintained customer skill home/i, 'public skill ownership'],
+    ['references/prerequisites.md', /builder --help`[^]*builder manifest --help`[^]*command help before invocation/i, 'manifest capability discovery'],
+    ['references/prerequisites.md', /If commands or flags are absent[^]*approved capable CLI build/i, 'missing manifest capability'],
+    ['references/prerequisites.md', /does not require customer \.NET or a separately installed analyzer/i, 'bundled analyzer prerequisite'],
+    ['references/source-and-manifest.md', /never substitute agent-written YAML or a second framework detector/i, 'deterministic manifest authority'],
+    ['references/source-and-manifest.md', /Samples inform app layout[^.]*CLI renders and validates the actual manifest/i, 'sample renderer coexistence'],
+    ['references/source-and-manifest.md', /`needsReview` can exit 0; `blocked` exits 1/i, 'proposal readiness versus exit'],
+    ['references/source-and-manifest.md', /JSON, not YAML[^]*`proposalId` and `selectedCandidateIds`[^]*only `candidateId`, `name`, `publicPath`, `build`, and `start`/i, 'bounded JSON resolution'],
+    ['references/source-and-manifest.md', /safe-change preview exits 1; `noChanges` exits 0/i, 'repair readiness versus exit'],
+    ['references/source-and-manifest.md', /Repair `--write` requires `--repair-id`; `--repair-id` without `--write` is invalid/i, 'repair write identity'],
+    ['references/source-and-manifest.md', /Stale input must be re-previewed, not bypassed/i, 'stale repair protection'],
+    ['references/source-and-manifest.md', /Do not hand-edit around rejected validators or disable checks/i, 'validator bypass protection'],
+    ['references/source-and-manifest.md', /BuilderAnalyzerFailed[^]*exitCode:2[^]*prerequisite failures exit 2/i, 'analyzer error envelope'],
+    ['references/source-and-manifest.md', /Docker\/Oryx: explain the execution and obtain approval first[^]*Docker is NOT a security boundary/i, 'manifest build consent'],
+    ['references/deployment.md', /If init writes the manifest, it stops[^]*review `git diff`[^]*commit and push[^]*rerun init/i, 'init review publication rerun'],
+    ['references/deployment.md', /Noninteractive `--yes` cannot approve manifest creation\/repair/i, 'init noninteractive manifest scope'],
+    ['references/deployment.md', /manifest tracked, the entire worktree clean[^]*local HEAD equal to the pushed branch tip[^]*rechecks before cloud mutation/i, 'init source gates'],
   ];
   for (const [path, pattern, label] of rules) {
     assert(pattern.test(contents[path]), `Missing general-safety invariant: ${label}`);
   }
   const source = contents['references/source-and-manifest.md'];
+  for (const command of [
+    'builder manifest propose "<app-source-root>" --json',
+    'builder manifest generate "<app-source-root>" --proposal-id "<proposal-id>"',
+    'builder manifest generate "<app-source-root>" --write --proposal-id "<same-proposal-id>"',
+    'builder manifest validate "<app-source-root>" --json',
+    'builder manifest repair "<app-source-root>" --json',
+    'builder manifest repair "<app-source-root>" --write --repair-id "<repair-id>"',
+  ]) {
+    assert(source.includes(command), `Missing manifest workflow command: ${command}`);
+  }
+  const manifestWriteSections = source.match(/Show the exact proposed[^]*?### Errors/);
+  assert(manifestWriteSections &&
+    /obtain explicit approval before writing/.test(manifestWriteSections[0]) &&
+    /show the exact diff, and get explicit approval/.test(manifestWriteSections[0]),
+  'Manifest writes require preview/diff approval');
   const examples = ['static-html', 'vite', 'nodejs', 'python', 'dotnet'];
   for (const example of examples) {
     assert(source.includes(`](https://github.com/Azure-Samples/app-service-builder-${example})`),
@@ -231,6 +263,8 @@ export function validatePlugin(root = repositoryRoot) {
       `CLI distribution URL must remain a placeholder: ${path}`);
     assert(!/\b(?:npm|pnpm|yarn|bun)\s+(?:install|add|i)\b|\bnpx\b|\b(?:curl|wget)\b[^\n]*\|\s*(?:sh|bash)\b/i.test(content),
       `Unapproved installer command: ${path}`);
+    assert(!/\bbuilder skills install\b/i.test(content),
+      `Duplicate skill installer: ${path}`);
   }
   for (const path of ['README.md', 'docs/agent-plugin.md',
     'plugin/skills/app-service-builder/references/prerequisites.md']) {
@@ -242,6 +276,8 @@ export function validatePlugin(root = repositoryRoot) {
     'Missing prerequisite stop/approved CLI guardrails');
   checkGuidance(skillRoot);
   const install = readFileSync(resolve(root, 'docs/agent-plugin.md'), 'utf8');
+  assert(/public repository is the maintained customer skill home/i.test(install),
+    'Installation docs must identify public skill ownership');
   for (const host of ['copilot', 'claude']) {
     assert(install.includes(`${host} plugin marketplace add microsoft/azure-app-service-builder`) &&
       install.includes(`${host} plugin install builder@azure-app-service-builder`),
