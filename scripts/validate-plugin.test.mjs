@@ -113,3 +113,48 @@ test('rejects removing the CLI installation placeholder', (t) => {
   writeFileSync(path, readFileSync(path, 'utf8').replace('CLI installation is a placeholder', 'Install now'));
   assert.throws(() => validatePlugin(directory), /Missing CLI installation placeholder/);
 });
+
+const skillRoot = 'plugin/skills/app-service-builder/';
+const unsafeGuidance = [
+  ['noncanonical docs host', 'SKILL.md',
+    'https://builder.appservice.azure.com/docs/', 'https://example.invalid/docs/', /canonical documentation/],
+  ['wrong troubleshooting destination', 'references/operations.md',
+    '/docs/troubleshooting/', '/docs/guides/troubleshooting/', /canonical documentation/],
+  ['missing runtime documentation', 'references/source-and-manifest.md',
+    '/docs/reference/runtimes/', '/docs/reference/other/', /canonical documentation/],
+  ['removed docs mismatch stop', 'SKILL.md',
+    'surface the mismatch and do not guess', 'guess the nearest syntax', /docs\/help mismatch/],
+  ['removed checkout protection', 'references/source-and-manifest.md',
+    'reset, stash, or change branches without approval', 'reset immediately', /checkout preservation/],
+  ['removed ancestry check', 'references/source-and-manifest.md',
+    'inspect ancestry', 'compare strings', /source ancestry/],
+  ['removed access distinction', 'references/source-and-manifest.md',
+    'missing repository/ref from denied access', 'all errors as missing refs', /source access/],
+  ['removed fork reuse', 'references/source-and-manifest.md',
+    'existing usable owner fork', 'new fork each time', /fork reuse/],
+  ['incorrect commit length', 'references/deployment.md',
+    'exactly 40 hexadecimal characters', 'a short SHA', /CLI commit pinning/],
+  ['missing default branch semantics', 'references/deployment.md',
+    'Resolve the configured branch', 'Use observed local HEAD', /default branch selection/],
+  ['missing rebuild branch semantics', 'references/deployment.md',
+    'Build a new version from the configured branch', 'Use the last viewed SHA', /rebuild branch selection/],
+  ['removed source automation disclosure', 'references/deployment.md',
+    'source change may trigger configured automation', 'source writes never have effects', /source effects/],
+  ['removed read-only reconciliation', 'references/operations.md',
+    'Reconciliation is read-only', 'Reconciliation resumes deployment', /read-only reconciliation/],
+  ['incorrect retry ID reuse', 'references/operations.md',
+    'changed intent needs a new ID', 'changed intent reuses the old ID', /retry intent/],
+  ['wrong inherited SHA limitation', 'references/deployment.md',
+    '## Verify service behavior', 'Deployment does not pin SHA.\n\n## Verify service behavior', /Incorrect CLI commit/],
+];
+
+for (const [name, path, before, after, expected] of unsafeGuidance) {
+  test(`rejects ${name}`, (t) => {
+    const directory = fixture(t);
+    const file = resolve(directory, skillRoot, path);
+    const content = readFileSync(file, 'utf8');
+    assert(content.includes(before), `Mutation target not found: ${before}`);
+    writeFileSync(file, content.replace(before, after));
+    assert.throws(() => validatePlugin(directory), expected);
+  });
+}

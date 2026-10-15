@@ -2,6 +2,8 @@
 
 Read command-specific help first. Every command below needs actual target values. Do not publish raw account details, operation URLs, or confidential logs in public feedback.
 
+Consult maintained [logging and monitoring](https://builder.appservice.azure.com/docs/guides/logging-and-monitoring/), [troubleshooting](https://builder.appservice.azure.com/docs/troubleshooting/), [deployment semantics](https://builder.appservice.azure.com/docs/guides/deployments/), and the [CLI reference](https://builder.appservice.azure.com/docs/reference/builder-cli/). Use [feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) to distinguish supported diagnostics from planned runtime features.
+
 ## Inspect apps and history
 
 ```shell
@@ -16,6 +18,18 @@ builder app deploymentlog "<app-name>" "<deployment-id>" --subscription "<subscr
 ```
 
 Version and deployment IDs must come from actual history. Use build logs to diagnose build failure and deployment logs to diagnose activation failure. `version build-log` can select `--component "<component>"` when needed. These commands are not runtime log streaming or live HTTP metrics; do not invent equivalent CLI commands.
+
+## Uncertain writes and retries
+
+A timeout, cancellation, or lost response does not prove a failed or cancelled server operation. Retain the exact target, request ID, returned operation URL, and known version/deployment IDs without exposing secrets. Inspect the actual app/source state, returned operation, and deployment history before retrying:
+
+```shell
+builder app status "<operation-url>" --subscription "<subscription-id>" --json
+```
+
+Use the returned URL only if known and trusted; if none was received, reconcile through app/history reads. Reconciliation is read-only: it must not implicitly resume writes, rollback/delete, or create duplicate apps, forks, or deployments. Preserve successful provisioning or source connection when a later step fails. An uncertain result is not evidence that all steps failed.
+
+Only after reconciliation and within the approved action, retry identical CLI deployment intent with the same `--request-id <id>`. A changed intent needs a new ID, not reuse of the old one. Respect pending-operation conflicts rather than replacing the active version. Do not promise universal cancellation or assume interrupting a local wait stops the server.
 
 ## Recover an eligible retained version
 

@@ -2,6 +2,8 @@
 
 App Service Builder is a **Private Preview** for **development/test**, not production. A public plugin is not product availability, preview enrollment, or service qualification.
 
+Consult [Private Preview guidance](https://builder.appservice.azure.com/docs/resources/preview/) for access, prerequisites, support, and limitations; check [feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) before recommending a workflow. Verify command syntax against the [CLI reference](https://builder.appservice.azure.com/docs/reference/builder-cli/) and installed help. Report disagreements or unavailable docs rather than guessing or relaxing qualification.
+
 ## CLI installation: placeholder
 
 **CLI installation is a placeholder. No TAR URL, npm package name, or installer command is published by this plugin. Do not execute placeholder installation steps.** Use an already-installed approved `builder` CLI. If it is absent, stop deployment and obtain the approved distribution and instructions from the preview contact. Do not download a lookalike package or infer an installation path.
@@ -12,7 +14,7 @@ The preview contact must supply authorization for the subscription and the appro
 
 ## Read-only readiness checks
 
-From the selected source repository, inspect local tooling and account state first:
+Local code and manifest inspection does not require Git initialization, sign-in, or a source connection. Do not create a repository or connect accounts just to read files. For cloud work, inspect local tooling and account state in the deliberately selected checkout:
 
 ```shell
 node --version
@@ -24,7 +26,7 @@ builder doctor --help
 builder doctor --json
 ```
 
-Do not request sign-in if the existing context is already correct. Do not switch accounts, tenants, subscriptions, or connections silently. If the confirmed management context needs authentication, consult help and use:
+The intended/selected account, verified identity, and actual target access are different checks. Do not request sign-in if the existing context is already correct. Preserve machine-wide account configuration: do not silently switch global CLI accounts or reuse another account's credential. Do not change tenants, subscriptions, or connections silently. If the confirmed management context needs authentication, consult help and use:
 
 ```shell
 builder login --tenant "<tenant-id>"
@@ -41,6 +43,8 @@ builder source login github
 ```
 
 GitHub user authorization does not prove that the GitHub App installation can access the selected repository. Confirm that access separately through the approved preview flow. Stop if access is missing; do not change repository permissions or install a GitHub App automatically.
+
+Keep credentials out of chat, manifests, remote URLs, and logs. Inspect only credential-free repository origins; do not display a token-bearing origin or copy it into a command. An account selection or successful login alone is not evidence of repository access.
 
 Microsoft management sign-in and GitHub source access do not configure authentication for visitors to the deployed app. There is no current Builder CLI command for deployed-app authentication.
 

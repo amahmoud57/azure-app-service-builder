@@ -12,6 +12,59 @@ const referenceNames = [
   'deployment.md',
   'operations.md',
 ];
+const productDocs = 'https://builder.appservice.azure.com/docs/';
+const documentationLinks = {
+  'SKILL.md': ['', 'resources/feature-status/'],
+  'references/prerequisites.md': ['resources/preview/', 'resources/feature-status/', 'reference/builder-cli/'],
+  'references/source-and-manifest.md': [
+    'guides/source-control/', 'guides/builder-yaml/', 'reference/runtimes/', 'resources/feature-status/',
+  ],
+  'references/deployment.md': [
+    'guides/deployments/', 'guides/source-control/', 'reference/builder-cli/', 'resources/feature-status/',
+  ],
+  'references/operations.md': [
+    'guides/logging-and-monitoring/', 'troubleshooting/', 'guides/deployments/',
+    'reference/builder-cli/', 'resources/feature-status/',
+  ],
+};
+
+function checkGuidance(skillRoot) {
+  const contents = {};
+  for (const [path, destinations] of Object.entries(documentationLinks)) {
+    const content = readFileSync(resolve(skillRoot, path), 'utf8');
+    contents[path] = content;
+    for (const destination of destinations) {
+      assert(content.includes(`](${productDocs}${destination})`),
+        `Missing canonical documentation destination in ${path}: ${destination || '/'}`);
+    }
+  }
+  const rules = [
+    ['SKILL.md', /If docs and help disagree[^.]*do not guess/i, 'docs/help mismatch'],
+    ['SKILL.md', /If docs cannot be fetched[^.]*do not promote unqualified features/i, 'unavailable docs'],
+    ['SKILL.md', /Plan approval[^.]*source publication[^.]*cloud deployment[^.]*distinct permissions/i, 'action scope'],
+    ['references/prerequisites.md', /do not silently switch global CLI accounts or reuse another account's credential/i, 'account preservation'],
+    ['references/source-and-manifest.md', /before Git initialization or account connection/i, 'local inspection'],
+    ['references/source-and-manifest.md', /Do not scan[^.]*reset, stash, or change branches without approval/i, 'checkout preservation'],
+    ['references/source-and-manifest.md', /inspect ancestry/i, 'source ancestry'],
+    ['references/source-and-manifest.md', /missing repository\/ref from denied access/i, 'source access'],
+    ['references/source-and-manifest.md', /existing usable owner fork/i, 'fork reuse'],
+    ['references/source-and-manifest.md', /upstream relationship, and intended branch/i, 'fork verification'],
+    ['references/deployment.md', /--commit[^.]*exactly 40 hexadecimal characters[^.]*forwards it/i, 'CLI commit pinning'],
+    ['references/deployment.md', /None[^\n]*configured branch/, 'default branch selection'],
+    ['references/deployment.md', /--rebuild[^\n]*configured branch/, 'rebuild branch selection'],
+    ['references/deployment.md', /--request-id <id>[^.]*stable idempotency key/i, 'deployment idempotency'],
+    ['references/deployment.md', /observed branch SHA, requested commit, built version, activation attempt, active version\/deployment, and real HTTP\/health response/i, 'serving evidence'],
+    ['references/deployment.md', /source change may trigger configured automation/i, 'source effects'],
+    ['references/operations.md', /Reconciliation is read-only[^.]*must not implicitly resume writes/i, 'read-only reconciliation'],
+    ['references/operations.md', /changed intent needs a new ID/i, 'retry intent'],
+    ['references/operations.md', /Do not promise universal cancellation/i, 'cancellation uncertainty'],
+  ];
+  for (const [path, pattern, label] of rules) {
+    assert(pattern.test(contents[path]), `Missing general-safety invariant: ${label}`);
+  }
+  assert(!/deploy(?:ment)? (?:does not|cannot) pin (?:a )?(?:commit|SHA)/i.test(contents['references/deployment.md']),
+    'Incorrect CLI commit-selector limitation');
+}
 
 function object(value, label, keys) {
   assert(value && typeof value === 'object' && !Array.isArray(value), `${label}: expected object`);
@@ -167,6 +220,7 @@ export function validatePlugin(root = repositoryRoot) {
   const prereqs = readFileSync(resolve(skillRoot, 'references/prerequisites.md'), 'utf8');
   assert(/stop deployment/i.test(prereqs) && /already-installed approved/.test(prereqs),
     'Missing prerequisite stop/approved CLI guardrails');
+  checkGuidance(skillRoot);
   const install = readFileSync(resolve(root, 'docs/agent-plugin.md'), 'utf8');
   for (const host of ['copilot', 'claude']) {
     assert(install.includes(`${host} plugin marketplace add microsoft/azure-app-service-builder`) &&

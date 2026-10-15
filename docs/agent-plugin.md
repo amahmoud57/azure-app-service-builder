@@ -35,6 +35,8 @@ These commands install the **agent plugin**, not the **Builder CLI**. They chang
 
 Local Node.js >=22, Git, GitHub CLI, authorized subscription, existing resource group, and approved location/connection settings are required. The preview contact supplies access and qualification; this repository does not supply onboarding or a list of qualified locations/platforms.
 
+The [canonical product docs](https://builder.appservice.azure.com/docs/) and [current feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) govern support, prerequisites, and limitations. The skill consults maintained docs first, uses bundled procedures, and checks installed CLI help for syntax. Public documentation does not change Private Preview access. Local code/manifest inspection can happen before Git initialization or account connection; cloud actions remain gated on readiness and their own scope.
+
 The [skill](../plugin/skills/app-service-builder/SKILL.md) includes self-contained [readiness](../plugin/skills/app-service-builder/references/prerequisites.md), [source](../plugin/skills/app-service-builder/references/source-and-manifest.md), [deployment](../plugin/skills/app-service-builder/references/deployment.md), and [operations](../plugin/skills/app-service-builder/references/operations.md) references. Unsupported or unqualified workflows must not be inferred from the existence of this plugin.
 
 ## Package layout and local checks
@@ -48,7 +50,7 @@ node --test scripts/validate-plugin.test.mjs
 node scripts/validate-plugin.mjs
 ```
 
-These offline checks validate the deliberately small manifest schema, required metadata, version agreement, contained relative paths, both entry points, the single skill's frontmatter, local Markdown links, bundled references, and installation-placeholder guardrails. Negative tests exercise broken metadata, paths, references, and unsafe placeholder edits. They do not run `builder`, fetch sample source, validate service access, or prove a deployment works.
+These offline checks validate the deliberately small manifest schema, required metadata, version agreement, contained relative paths, both entry points, the single skill's frontmatter, local Markdown links, bundled references, canonical product documentation destinations, and installation-placeholder guardrails. Focused safety assertions protect source preservation, read-only reconciliation, and the CLI commit-selector distinction; they are not a semantic safety proof. Negative tests exercise broken metadata, paths, references, documentation destinations, and unsafe edits. They do not run `builder`, fetch sample source, validate live doc content/service access, or prove a deployment works.
 
 If Claude Code is already available, `claude plugin validate ./plugin` and `claude plugin validate .` provide additional native manifest validation. Native discovery should be checked using isolated temporary host configuration, not by installing into a contributor's global configuration. Record the host/version and actual result in the PR; missing hosts or live preview checks remain explicit gaps.
 

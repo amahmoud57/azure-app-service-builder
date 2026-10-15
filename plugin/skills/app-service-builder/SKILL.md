@@ -9,11 +9,13 @@ Help authorized customers use the `builder` CLI for **Private Preview developmen
 
 ## Before acting
 
+Use the [canonical product documentation](https://builder.appservice.azure.com/docs/) and check [current feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) before recommending a workflow. Maintained docs govern support, prerequisites, and limitations; bundled references provide procedure; installed CLI help verifies actual syntax. If docs and help disagree, surface the mismatch and do not guess. If docs cannot be fetched, disclose the gap and do not promote unqualified features. Public docs do not make the platform publicly available.
+
 1. Confirm the user means **App Service Builder**. For an ambiguous deployment request, ask which product and target they intend; do not default to Builder or substitute ordinary App Service/Container Apps tooling.
-2. Read [prerequisites](references/prerequisites.md). Require an already-installed approved CLI, Node.js >=22, Git, GitHub CLI, authorized subscription, existing resource group, and location/connection settings from the preview contact. **CLI installation is a placeholder.** If anything is missing or unqualified, stop deployment and explain the blocker. Never guess an installer, account, location, endpoint, or access procedure.
+2. Local code/manifest inspection can precede Git initialization or account connection. Before cloud work, read [prerequisites](references/prerequisites.md): require an already-installed approved CLI, Node.js >=22, Git, GitHub CLI, authorized subscription, existing resource group, and approved location/connection settings. **CLI installation is a placeholder.** Missing or unqualified prerequisites stop deployment; never guess installers or access settings.
 3. Read local CLI help and inspect existing account/session context before requesting sign-in. Preserve existing sessions and account context. Keep Microsoft management authentication, GitHub user authorization, GitHub App repository access, and deployed-app sign-in distinct.
-4. Establish the exact app name, subscription, resource group, selected GitHub repository, pushed branch/commit, and selected source root. Inspect existing app state when relevant. Do not assume initialization creates a saved local app binding.
-5. Explain the target and action before initialization, deployment/rebuild, retained-version activation, or deletion. Honor explicit user scope; ask for approval when scope is missing or ambiguous. Never convert vague requests into resource changes or use bypass flags to approve guessed values.
+4. Before publication/deployment, bind the exact app, subscription/resource group, repository identity, branch, source attachment root, and deliberately selected checkout. Preserve dirty/unrelated work; reconcile actual source/account state rather than inferring readiness from a local preview or sample.
+5. Scope each write to the confirmed target and requested action. Plan approval, local preview, source publication, cloud deployment, retained recovery, and deletion are distinct permissions, not blanket approval. Ask only when needed to resolve scope; do not use bypass flags to approve guessed values. Reconcile unknown write outcomes read-only before retrying.
 
 ## Choose the focused workflow
 
@@ -28,8 +30,8 @@ Read the relevant reference in full. All command examples have descriptive place
 
 ## Boundaries and completion
 
-- Work from the user's selected GitHub repository and its pushed source. Initialization connects source; it neither deploys nor uploads local changes. No local ZIP upload or native GitHub push-deployment workflow is provided.
-- Supported core shapes here are static browser assets or HTTP apps (Node, Python, .NET, PHP 8.5). One static component plus one HTTP backend is a separate combined shape, not a promise of Next.js support.
+- Work from the user's selected GitHub repository and pushed source; samples are optional. Provisioning, source connection, and deployment are separate effects. `init` is setup, not a local upload or explicit deploy; source changes may trigger configured automation where enabled. Preserve partial success and retry only the missing step.
+- Static browser assets and qualified HTTP apps are the core focus. Runtime recognition is not version/target qualification; current feature status takes precedence over bundled examples. Combined output and Next.js require separate confirmation.
 - Do not provide runnable instructions for unverified preview workflows: Next.js standalone, managed identity/dependent integrations, native GitHub push deployment, runtime log streaming/metrics, scale to zero, custom domains, private networking, persistent mounts, or shell access. There are no current Builder CLI commands for variables, identity, or deployed-app authentication.
 - A request accepted by the service, successful build, or operation completion alone is not a serving app. Inspect returned app state and runtime URL, then verify real HTTP behavior and the app-owned health endpoint. Report any unverified stage plainly.
 - Do not change cloud access or install plugins globally as part of app work. Keep secrets and confidential diagnostics out of source, responses, and public feedback. For public feedback use sanitized examples; report vulnerabilities privately via the repository's security policy.
