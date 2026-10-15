@@ -6,11 +6,11 @@ This guide defines the GitHub intake contract. It does not implement portal code
 
 ## Publication and access gates
 
-The repository is currently private. These forms must be merged into the default branch (`main`) before GitHub uses them. External customer intake additionally requires approval to make the repository public; this setup does not change visibility. While private, only users with appropriate repository access can use these links.
+The repository is public. GitHub uses issue forms from the default branch (`main`). Repository visibility and feedback intake do not grant access to the App Service Builder Private Preview or announce public service availability.
 
 GitHub requires users to sign in to submit an issue. A public issue is attributable to its GitHub author and is not anonymous feedback. Anonymous portal feedback requires a separate mechanism; it must not silently become a public GitHub issue.
 
-Before enabling customer-facing links, confirm the publication/access decision, the merged forms, and the labels below, then exercise each form with an authorized reviewer without submitting a customer issue. Check chooser order, required fields, text prefill, labels, and the security/support exits. Browser behavior cannot be confirmed from unmerged files alone.
+Before enabling customer-facing links, confirm the merged forms and the labels below, then exercise each form with an authorized reviewer without submitting a customer issue. Check chooser order, required fields, text prefill, labels, and the security/support exits. Browser behavior cannot be confirmed from unmerged files alone.
 
 ## Category and label mapping
 

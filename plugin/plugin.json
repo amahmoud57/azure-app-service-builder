@@ -1,0 +1,13 @@
+{
+  "name": "builder",
+  "description": "Customer-facing App Service Builder guidance for authorized Private Preview development/test use.",
+  "version": "0.1.0",
+  "author": {
+    "name": "Microsoft"
+  },
+  "homepage": "https://github.com/microsoft/azure-app-service-builder",
+  "repository": "https://github.com/microsoft/azure-app-service-builder",
+  "license": "MIT",
+  "keywords": ["azure", "app-service-builder", "agent-skills"],
+  "skills": "./skills/"
+}
