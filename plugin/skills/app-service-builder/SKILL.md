@@ -22,11 +22,13 @@ Use the [canonical product documentation](https://builder.appservice.azure.com/d
 | Task | Read before executing |
 | --- | --- |
 | Check access, CLI readiness, and source authorization | [Prerequisites and readiness](references/prerequisites.md) |
-| Prepare the selected repository's `builder.yaml` | [Source and manifest](references/source-and-manifest.md) |
+| Prepare an app or `builder.yaml`, optionally using a matching sample's structure | [Source and manifest](references/source-and-manifest.md) |
 | Initialize, deploy, and verify the serving app | [Deployment](references/deployment.md) |
 | Inspect failures/history, recover, or delete | [Operations](references/operations.md) |
 
 Read the relevant reference in full. All command examples have descriptive placeholders: replace them only with user-confirmed or verified values; never execute angle-bracket values literally. Use `builder --help` and command-specific help to check the installed CLI before using options. Do not invent missing commands.
+
+For a starting point, detect the existing framework/runtime and static versus HTTP shape first. Use the [published sample catalog](https://builder.appservice.azure.com/docs/samples/) for context and the verified public examples in the source reference; inspect the selected sample's current README, root `builder.yaml`, and relevant project/startup/health files before proposing small adaptations. Preserve existing source instead of requiring a fork. Source examples do not override current availability warnings.
 
 ## Boundaries and completion
 

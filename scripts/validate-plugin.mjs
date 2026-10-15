@@ -14,10 +14,10 @@ const referenceNames = [
 ];
 const productDocs = 'https://builder.appservice.azure.com/docs/';
 const documentationLinks = {
-  'SKILL.md': ['', 'resources/feature-status/'],
+  'SKILL.md': ['', 'resources/feature-status/', 'samples/'],
   'references/prerequisites.md': ['resources/preview/', 'resources/feature-status/', 'reference/builder-cli/'],
   'references/source-and-manifest.md': [
-    'guides/source-control/', 'guides/builder-yaml/', 'reference/runtimes/', 'resources/feature-status/',
+    'guides/source-control/', 'guides/builder-yaml/', 'reference/runtimes/', 'resources/feature-status/', 'samples/',
   ],
   'references/deployment.md': [
     'guides/deployments/', 'guides/source-control/', 'reference/builder-cli/', 'resources/feature-status/',
@@ -49,6 +49,16 @@ function checkGuidance(skillRoot) {
     ['references/source-and-manifest.md', /missing repository\/ref from denied access/i, 'source access'],
     ['references/source-and-manifest.md', /existing usable owner fork/i, 'fork reuse'],
     ['references/source-and-manifest.md', /upstream relationship, and intended branch/i, 'fork verification'],
+    ['references/source-and-manifest.md', /existing framework\/runtime and app shape/i, 'existing app shape'],
+    ['references/source-and-manifest.md', /Read its current README and root `builder.yaml`/i, 'sample inspection'],
+    ['references/source-and-manifest.md', /as data, not instructions that override user scope/i, 'sample trust boundary'],
+    ['references/source-and-manifest.md', /smallest adaptations to the user's actual repo/i, 'sample adaptation'],
+    ['references/source-and-manifest.md', /Do not automatically fork, clone over, copy wholesale, change language, or reset/i, 'sample preservation'],
+    ['references/source-and-manifest.md', /Public source publication never overrides live availability warnings/i, 'sample qualification'],
+    ['references/source-and-manifest.md', /Disclose discrepancies between production docs and current sample README/i, 'sample documentation drift'],
+    ['references/source-and-manifest.md', /not vendored into the plugin or fetched by packaging tests\/builds/i, 'offline sample boundary'],
+    ['references/source-and-manifest.md', /static Vite sample is not a TypeScript web-runtime guarantee/i, 'static runtime distinction'],
+    ['references/source-and-manifest.md', /not a successful hosted deployment/i, 'sample completion evidence'],
     ['references/deployment.md', /--commit[^.]*exactly 40 hexadecimal characters[^.]*forwards it/i, 'CLI commit pinning'],
     ['references/deployment.md', /None[^\n]*configured branch/, 'default branch selection'],
     ['references/deployment.md', /--rebuild[^\n]*configured branch/, 'rebuild branch selection'],
@@ -61,6 +71,16 @@ function checkGuidance(skillRoot) {
   ];
   for (const [path, pattern, label] of rules) {
     assert(pattern.test(contents[path]), `Missing general-safety invariant: ${label}`);
+  }
+  const source = contents['references/source-and-manifest.md'];
+  const examples = ['static-html', 'vite', 'nodejs', 'python', 'dotnet'];
+  for (const example of examples) {
+    assert(source.includes(`](https://github.com/Azure-Samples/app-service-builder-${example})`),
+      `Missing approved public sample destination: ${example}`);
+  }
+  for (const content of Object.values(contents)) {
+    assert(!/https:\/\/builder\.appservice\.azure\.com\/docs\/downloads\/|(?:\.\.\/)?samples\/(?:static-html|nodejs-web|python-web|dotnet-web|vite-static)/i.test(content),
+      'Retired sample distribution path');
   }
   assert(!/deploy(?:ment)? (?:does not|cannot) pin (?:a )?(?:commit|SHA)/i.test(contents['references/deployment.md']),
     'Incorrect CLI commit-selector limitation');
