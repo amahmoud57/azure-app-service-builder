@@ -6,7 +6,7 @@ This hub welcomes general product feedback, feature requests, bug reports, and i
 
 [Search existing issues](https://github.com/microsoft/azure-app-service-builder/issues?q=is%3Aissue), including closed issues, before submitting feedback. Use the appropriate [issue form](https://github.com/microsoft/azure-app-service-builder/issues/new/choose). For an existing request, add a reaction instead of a "+1" comment; add comments when they contribute a new use case or reproducible detail.
 
-Describe the customer problem and outcome in your own words. Use small, sanitized examples for bugs. Do not include email addresses, account or contact details, credentials, subscription or resource IDs, customer data, or confidential diagnostics in titles, descriptions, comments, or attachments. Treat submissions as public, even while the repository is private.
+Describe the customer problem and outcome in your own words. Use small, sanitized examples for bugs. Do not include email addresses, account or contact details, credentials, subscription or resource IDs, customer data, or confidential diagnostics in titles, descriptions, comments, or attachments. Submissions to this repository are public.
 
 Use [support guidance](SUPPORT.md) for urgent or account-specific problems. Report vulnerabilities privately through [SECURITY.md](SECURITY.md), never in an issue or pull request.
 
@@ -19,6 +19,8 @@ Triage is not a delivery commitment or a response-time promise. An issue may rem
 ## Resource and documentation changes
 
 Pull requests can improve this hub's instructions, public links, and feedback forms. Keep content suitable for public visibility and do not add internal links or unpublished product claims. Explain the customer-facing improvement in the pull request. Changes to form filenames, field IDs, labels, or headings must also update the [portal integration contract](docs/portal-feedback-integration.md).
+
+For agent-plugin changes, keep both host manifests and the shared skill tree consistent, preserve preview/readiness boundaries, and run the offline checks in [plugin contribution guidance](docs/agent-plugin.md#package-layout-and-local-checks). CLI installation remains a placeholder until an approved distribution is supplied; do not add guessed package names or download commands.
 
 ## Contributor agreement and conduct
 

@@ -2,7 +2,13 @@
 
 This repository is the customer resource and product feedback hub for Azure App Service Builder. Feedback can cover the whole product. This is not the product source code repository or a replacement for Azure Support.
 
-The product is prelaunch. Product-specific documentation, portal entry points, and samples will be linked here when they are published. This hub does not announce product availability or supported capabilities.
+App Service Builder is in **Private Preview for development/test, not production**. This public resource hub does not grant preview access or announce public service availability. Additional product-specific documentation and portal entry points will be linked here when published.
+
+## Agent skills plugin
+
+The initial `builder` agent plugin contains one customer-facing skill, `app-service-builder`, for GitHub Copilot CLI and Claude Code. See [plugin installation and readiness limits](docs/agent-plugin.md).
+
+Plugin installation is separate from Builder CLI installation and full service qualification. **CLI installation is a placeholder**: use an already-installed approved CLI, or stop deployment until the preview contact provides the approved distribution and instructions. No TAR URL, npm package name, or installer command is provided.
 
 ## Share feedback
 
@@ -18,7 +24,7 @@ The product is prelaunch. Product-specific documentation, portal entry points, a
 
 **Treat issue titles, descriptions, comments, and attachments as public.** Do not include email addresses, account or contact details, credentials, subscription or resource IDs, customer data, or confidential diagnostics. Report vulnerabilities privately, not in GitHub Issues.
 
-These forms become available after they are merged into the default branch. This repository is currently private; external customer intake also requires an approved change to public visibility. That publication decision is separate from this setup.
+This repository is public. Repository visibility and feedback intake are separate from product availability and preview access.
 
 ## Resources
 

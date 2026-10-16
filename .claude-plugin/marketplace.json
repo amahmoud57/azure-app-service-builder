@@ -1,0 +1,18 @@
+{
+  "name": "azure-app-service-builder",
+  "owner": {
+    "name": "Microsoft"
+  },
+  "metadata": {
+    "description": "Customer-facing App Service Builder agent skills for authorized Private Preview users.",
+    "version": "0.1.0"
+  },
+  "plugins": [
+    {
+      "name": "builder",
+      "description": "Prepare, deploy, inspect, and recover development/test apps with App Service Builder.",
+      "version": "0.1.0",
+      "source": "./plugin"
+    }
+  ]
+}
