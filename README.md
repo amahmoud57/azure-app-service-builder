@@ -2,11 +2,27 @@
 
 This repository is the customer resource and product feedback hub for Azure App Service Builder. Feedback can cover the whole product. This is not the product source code repository or a replacement for Azure Support.
 
-App Service Builder is in **Private Preview for development/test, not production**. This public resource hub does not grant preview access or announce public service availability. Additional product-specific documentation and portal entry points will be linked here when published.
+App Service Builder is in **Private Preview for development/test, not production**. This public resource hub does not grant preview access or announce public service availability. See the [App Service Builder documentation](https://builder.appservice.azure.com/docs/) for product instructions, prerequisites, and limitations.
 
 ## Agent skills plugin
 
-The initial `builder` agent plugin contains one customer-facing skill, `app-service-builder`, for GitHub Copilot CLI and Claude Code. See [plugin installation and readiness limits](docs/agent-plugin.md).
+The `builder` agent plugin contains one customer-facing skill, `app-service-builder`, for GitHub Copilot CLI and Claude Code. Install it through the repository-hosted marketplace using your installed host:
+
+### GitHub Copilot CLI
+
+```shell
+copilot plugin marketplace add microsoft/azure-app-service-builder
+copilot plugin install builder@azure-app-service-builder
+```
+
+### Claude Code
+
+```shell
+claude plugin marketplace add microsoft/azure-app-service-builder
+claude plugin install builder@azure-app-service-builder
+```
+
+See [plugin installation and readiness limits](docs/agent-plugin.md) for verification commands and usage.
 
 Plugin installation is separate from Builder CLI installation and full service qualification. **CLI installation is a placeholder**: use an already-installed approved CLI, or stop deployment until the preview contact provides the approved distribution and instructions. No TAR URL, npm package name, or installer command is provided.
 

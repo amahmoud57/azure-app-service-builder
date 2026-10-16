@@ -172,7 +172,8 @@ function checkLinks(path, root, pluginRoot) {
     if (!local) continue;
     assert(!/^[a-z]+:/i.test(local), `Unsupported link in ${path}: ${href}`);
     const target = realpathSync(resolve(dirname(path), decodeURIComponent(local)));
-    const boundary = path.startsWith(`${pluginRoot}${sep}`) ? pluginRoot : root;
+    const boundary = path.startsWith(`${pluginRoot}${sep}`) &&
+      path !== resolve(pluginRoot, 'README.md') ? pluginRoot : root;
     const rel = relative(boundary, target);
     assert(rel !== '..' && !rel.startsWith(`..${sep}`) && !isAbsolute(rel),
       `Link escapes package in ${path}: ${href}`);
@@ -246,7 +247,7 @@ export function validatePlugin(root = repositoryRoot) {
   assert.deepEqual(
     pluginFiles.map((path) => relative(pluginRoot, path).split(sep).join('/')).sort(),
     [
-      '.claude-plugin/plugin.json', 'plugin.json', 'skills/app-service-builder/SKILL.md',
+      '.claude-plugin/plugin.json', 'README.md', 'plugin.json', 'skills/app-service-builder/SKILL.md',
       ...referenceNames.map((name) => `skills/app-service-builder/references/${name}`),
     ].sort(),
     'Expected skills-only package without extra components',
@@ -266,7 +267,7 @@ export function validatePlugin(root = repositoryRoot) {
     assert(!/\bbuilder skills install\b/i.test(content),
       `Duplicate skill installer: ${path}`);
   }
-  for (const path of ['README.md', 'docs/agent-plugin.md',
+  for (const path of ['README.md', 'docs/agent-plugin.md', 'plugin/README.md',
     'plugin/skills/app-service-builder/references/prerequisites.md']) {
     assert(/CLI installation is a placeholder/.test(readFileSync(resolve(root, path), 'utf8')),
       `Missing CLI installation placeholder: ${path}`);
@@ -278,10 +279,13 @@ export function validatePlugin(root = repositoryRoot) {
   const install = readFileSync(resolve(root, 'docs/agent-plugin.md'), 'utf8');
   assert(/public repository is the maintained customer skill home/i.test(install),
     'Installation docs must identify public skill ownership');
-  for (const host of ['copilot', 'claude']) {
-    assert(install.includes(`${host} plugin marketplace add microsoft/azure-app-service-builder`) &&
-      install.includes(`${host} plugin install builder@azure-app-service-builder`),
-    `Missing ${host} installation flow`);
+  for (const path of ['README.md', 'docs/agent-plugin.md', 'plugin/README.md']) {
+    const content = readFileSync(resolve(root, path), 'utf8');
+    for (const host of ['copilot', 'claude']) {
+      assert(content.includes(`${host} plugin marketplace add microsoft/azure-app-service-builder`) &&
+        content.includes(`${host} plugin install builder@azure-app-service-builder`),
+      `Missing ${host} installation flow in ${path}`);
+    }
   }
   return { marketplace: catalog.name, plugin: copilot.name, version: copilot.version, skills: 1 };
 }

@@ -8,7 +8,7 @@ This public repository is the maintained customer skill home. The Builder CLI ow
 
 ## Install the plugin
 
-Use an installed host that supports plugins. The following repository-based commands work once this package is merged into the repository's default branch; a draft PR is not a published marketplace release.
+Use an installed host that supports plugins to install from this repository's marketplace:
 
 ### GitHub Copilot CLI
 
