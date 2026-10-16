@@ -80,12 +80,14 @@ test('rejects a missing bundled reference', (t) => {
   assert.throws(() => validatePlugin(directory), /ENOENT/);
 });
 
-test('rejects broken local links', (t) => {
-  const directory = fixture(t);
-  const path = resolve(directory, 'docs/agent-plugin.md');
-  writeFileSync(path, readFileSync(path, 'utf8') + '\n[Broken](missing.md)\n');
-  assert.throws(() => validatePlugin(directory), /ENOENT/);
-});
+for (const file of ['docs/agent-plugin.md', 'plugin/README.md']) {
+  test(`rejects broken local links in ${file}`, (t) => {
+    const directory = fixture(t);
+    const path = resolve(directory, file);
+    writeFileSync(path, readFileSync(path, 'utf8') + '\n[Broken](missing.md)\n');
+    assert.throws(() => validatePlugin(directory), /ENOENT/);
+  });
+}
 
 test('rejects references outside the installed plugin', (t) => {
   const directory = fixture(t);
@@ -107,11 +109,22 @@ for (const [name, addition, expected] of [
   });
 }
 
-test('rejects removing the CLI installation placeholder', (t) => {
+for (const file of ['docs/agent-plugin.md', 'plugin/README.md']) {
+  test(`rejects removing the CLI installation placeholder in ${file}`, (t) => {
+    const directory = fixture(t);
+    const path = resolve(directory, file);
+    writeFileSync(path, readFileSync(path, 'utf8').replace('CLI installation is a placeholder', 'Install now'));
+    assert.throws(() => validatePlugin(directory), /Missing CLI installation placeholder/);
+  });
+}
+
+test('rejects incorrect plugin landing page installation identity', (t) => {
   const directory = fixture(t);
-  const path = resolve(directory, 'docs/agent-plugin.md');
-  writeFileSync(path, readFileSync(path, 'utf8').replace('CLI installation is a placeholder', 'Install now'));
-  assert.throws(() => validatePlugin(directory), /Missing CLI installation placeholder/);
+  const path = resolve(directory, 'plugin/README.md');
+  writeFileSync(path, readFileSync(path, 'utf8').replace(
+    'claude plugin install builder@azure-app-service-builder',
+    'claude plugin install builder@different-marketplace'));
+  assert.throws(() => validatePlugin(directory), /Missing claude installation flow in plugin\/README.md/);
 });
 
 test('rejects a duplicate CLI skill installer in installation docs', (t) => {
