@@ -6,7 +6,9 @@ Consult [Private Preview guidance](https://builder.appservice.azure.com/docs/res
 
 ## Install Builder CLI
 
-Use an already-installed approved `builder` CLI when available. Otherwise obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the preview contact and follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
+Use an already-installed approved `builder` CLI when available. Otherwise obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or the preview contact and follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
+
+Use the CLI release asset and its published SHA-256 checksum, not GitHub's automatic source-code ZIP or tarball. Compute and compare the local archive's hash before installing it. If an approved asset or trusted checksum is unavailable, ask the preview contact; do not guess a version or download URL.
 
 After approval to install the downloaded archive:
 

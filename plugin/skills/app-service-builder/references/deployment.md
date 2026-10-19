@@ -30,7 +30,9 @@ Read `builder app deploy --help` and inspect the intended source/target before d
 builder app deploy --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>"
 ```
 
-Deployment waits by default. Use at most one selector:
+Deployment waits by default. If a status read fails, including HTTP 429, follow [uncertain-write reconciliation](operations.md#uncertain-writes-and-retries) before considering another deployment. A failed local wait does not establish that the server operation failed.
+
+Use at most one selector:
 
 | Selector | Requested content |
 | --- | --- |

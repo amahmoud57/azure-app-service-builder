@@ -49,6 +49,8 @@ Variable writes change desired configuration without creating a version or deplo
 
 ## Uncertain writes and retries
 
+A transient HTTP 429 during status polling can end the local wait while the accepted operation continues. Do not assume automatic status-read retries or repeat a deployment to work around throttling.
+
 A timeout, cancellation, or lost response does not prove a failed or cancelled server operation. Retain the exact target, request ID, returned operation URL, and known version/deployment IDs without exposing secrets. Inspect the actual app/source state, returned operation, and deployment history before retrying:
 
 ```shell

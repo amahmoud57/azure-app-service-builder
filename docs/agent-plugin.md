@@ -33,7 +33,9 @@ These commands install the **agent plugin**, not the **Builder CLI**. They chang
 
 ## Install Builder CLI separately
 
-Obtain the approved portable `azure-builder-cli-<version>.tgz` archive and connection settings from your preview contact. Follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
+Obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or your preview contact. The contact supplies preview access and connection settings. Follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
+
+Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. Verify the downloaded archive against its published SHA-256 checksum before installation. If an approved asset or trusted checksum is unavailable, ask the preview contact rather than guessing a version or download URL.
 
 Install the downloaded local archive, with the user's approval:
 
@@ -43,7 +45,7 @@ builder --version
 builder --help
 ```
 
-Replace the path with the actual approved download. Do not extract the archive or install a guessed npm-registry package. npm registry access is still needed for JavaScript dependencies; this repository does not publish a CLI download URL.
+Replace the path with the actual approved download. Do not extract the archive or install a guessed npm-registry package. npm registry access is still needed for JavaScript dependencies.
 
 The archive includes the portable analyzer, not the .NET runtime. A compatible .NET 10 runtime is required only for local `builder manifest` commands. Login, initialization, and deployment work without .NET. The analyzer's generated `Embr.BuildAnalyzer.runtimeconfig.json` specifies the required runtime; a .NET SDK is not required. An existing compatible SDK includes the runtime.
 
@@ -72,7 +74,7 @@ node --test scripts/validate-plugin.test.mjs
 node scripts/validate-plugin.mjs
 ```
 
-These offline checks validate the deliberately small manifest schema, required metadata, version agreement, contained relative paths, both entry points, the single skill's frontmatter, local Markdown links, bundled references, canonical product documentation destinations, and approved-archive installation guardrails. Focused safety assertions protect source preservation, read-only reconciliation, CLI commit selection, variable-editing scope, and existing-manifest validation; they are not a semantic safety proof or CLI runtime smoke test. Negative tests exercise broken metadata, paths, references, documentation destinations, unsafe edits, and commands outside the shipped CLI. They do not run `builder`, fetch sample source, validate live doc content/service access, or prove a deployment works.
+These offline checks validate the deliberately small manifest schema, required metadata, version agreement, contained relative paths, both entry points, the single skill's frontmatter, local Markdown links, bundled references, canonical product documentation destinations, and approved-archive installation guardrails. Official release-asset links are allowed; other archive sources and automatic source-code downloads are rejected. Link-shape validation does not prove that an asset is published or its checksum matches: verify the actual download before advertising a specific release. Focused safety assertions protect source preservation, read-only reconciliation, CLI commit selection, variable-editing scope, and existing-manifest validation; they are not a semantic safety proof or CLI runtime smoke test. Negative tests exercise broken metadata, paths, references, documentation destinations, unsafe edits, and commands outside the shipped CLI. They do not run `builder`, fetch sample source, validate live doc content/service access, or prove a deployment works.
 
 If Claude Code is already available, `claude plugin validate ./plugin` and `claude plugin validate .` provide additional native manifest validation. Native discovery should be checked using isolated temporary host configuration, not by installing into a contributor's global configuration. Record the host/version and actual result in the PR; missing hosts or live preview checks remain explicit gaps.
 

@@ -111,8 +111,14 @@ for (const [name, addition, expected] of [
   ['registry package instead of local archive', '\nnpm install --global guessed-builder\n', /installer command/],
   ['npx installer', '\nnpx guessed-builder\n', /installer command/],
   ['invented TAR URL', '\nhttps://example.invalid/builder.tar.gz\n', /distribution URL/],
+  ['foreign release asset', '\nhttps://github.com/example/builder/releases/download/v0.0.1/azure-builder-cli-0.0.1.tgz\n', /distribution URL/],
+  ['insecure release asset', '\nhttp://github.com/microsoft/azure-app-service-builder/releases/download/v0.0.1/azure-builder-cli-0.0.1.tgz\n', /distribution URL/],
+  ['redirected release asset', '\nhttps://github.com/microsoft/azure-app-service-builder/releases/download/v0.0.1/azure-builder-cli-0.0.1.tgz?redirect=elsewhere\n', /distribution URL/],
+  ['invalid release version', '\nhttps://github.com/microsoft/azure-app-service-builder/releases/download/v0.0.1/azure-builder-cli-00.0.1.tgz\n', /distribution URL/],
+  ['automatic source archive', '\nhttps://github.com/microsoft/azure-app-service-builder/archive/refs/tags/v0.1.1.tar.gz\n', /distribution URL/],
   ['remote shell installer', '\n```shell\ncurl https://example.invalid/install | bash\n```\n', /installer command/],
   ['stale installation placeholder', '\nCLI installation is a placeholder.\n', /Outdated CLI guidance/],
+  ['stale release-publication prohibition', '\nThis repository does not publish a CLI download URL.\n', /Outdated CLI guidance/],
   ['stale variable-command limitation', '\nThere are no current Builder CLI commands for variables.\n', /Outdated CLI guidance/],
   ['conditional manifest rendering', '\nUse a capable CLI for manifest rendering.\n', /Unshipped manifest authoring guidance/],
 ]) {
@@ -121,6 +127,35 @@ for (const [name, addition, expected] of [
     const path = resolve(directory, 'docs/agent-plugin.md');
     writeFileSync(path, readFileSync(path, 'utf8') + addition);
     assert.throws(() => validatePlugin(directory), expected);
+  });
+}
+
+for (const suffix of ['.tgz', '.tgz.sha256']) {
+  test(`accepts approved official CLI release asset ${suffix}`, (t) => {
+    const directory = fixture(t);
+    const path = resolve(directory, 'docs/agent-plugin.md');
+    const url = `https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1${suffix}`;
+    writeFileSync(path, readFileSync(path, 'utf8') + `\n[Approved release asset](${url})\n`);
+    assert.equal(validatePlugin(directory).version, '0.1.1');
+  });
+}
+
+for (const file of ['docs/agent-plugin.md', 'plugin/skills/app-service-builder/references/prerequisites.md']) {
+  test(`rejects removing the official CLI release source in ${file}`, (t) => {
+    const directory = fixture(t);
+    const path = resolve(directory, file);
+    writeFileSync(path, readFileSync(path, 'utf8').replace(
+      'https://github.com/microsoft/azure-app-service-builder/releases',
+      'https://example.invalid/releases'));
+    assert.throws(() => validatePlugin(directory), /Missing official CLI release source/);
+  });
+
+  test(`rejects removing archive checksum verification in ${file}`, (t) => {
+    const directory = fixture(t);
+    const path = resolve(directory, file);
+    writeFileSync(path, readFileSync(path, 'utf8').replace(
+      'published SHA-256 checksum', 'unverified download'));
+    assert.throws(() => validatePlugin(directory), /Missing archive checksum verification/);
   });
 }
 
@@ -208,6 +243,17 @@ const unsafeGuidance = [
     'source change may trigger configured automation', 'source writes never have effects', /source effects/],
   ['removed read-only reconciliation', 'references/operations.md',
     'Reconciliation is read-only', 'Reconciliation resumes deployment', /read-only reconciliation/],
+  ['assuming polling failure cancelled deployment', 'references/operations.md',
+    'A transient HTTP 429 during status polling can end the local wait while the accepted operation continues',
+    'A polling failure proves the deployment was cancelled', /polling failure reconciliation/],
+  ['assuming automatic polling retries', 'references/operations.md',
+    'Do not assume automatic status-read retries', 'Always assume automatic status-read retries', /polling retry boundary/],
+  ['ignoring target runtime enablement', 'references/source-and-manifest.md',
+    'runtime enablement has not reached the selected target',
+    'all targets have identical runtime enablement', /deployed runtime qualification/],
+  ['changing language to conceal activation failure', 'references/source-and-manifest.md',
+    'Do not switch languages or replace the app to conceal the rejection',
+    'Switch languages to hide the rejection', /runtime failure transparency/],
   ['incorrect retry ID reuse', 'references/operations.md',
     'changed intent needs a new ID', 'changed intent reuses the old ID', /retry intent/],
   ['wrong inherited SHA limitation', 'references/deployment.md',

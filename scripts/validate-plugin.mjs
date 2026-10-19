@@ -14,6 +14,8 @@ const referenceNames = [
 ];
 const productDocs = 'https://builder.appservice.azure.com/docs/';
 const cliInstallDocs = `${productDocs}quickstarts/builder-cli/`;
+const cliReleases = 'https://github.com/microsoft/azure-app-service-builder/releases';
+const releaseAssetPattern = /^https:\/\/github\.com\/microsoft\/azure-app-service-builder\/releases\/download\/[A-Za-z0-9._-]+\/azure-builder-cli-(.+)\.tgz(?:\.sha256)?$/;
 const archiveInstallCommand = 'npm install --global "<path-to-downloaded-file.tgz>"';
 const documentationLinks = {
   'SKILL.md': ['', 'resources/feature-status/', 'samples/'],
@@ -63,6 +65,8 @@ function checkGuidance(skillRoot) {
     ['references/source-and-manifest.md', /Disclose discrepancies between production docs and current sample README/i, 'sample documentation drift'],
     ['references/source-and-manifest.md', /not vendored into the plugin or fetched by packaging tests\/builds/i, 'offline sample boundary'],
     ['references/source-and-manifest.md', /static Vite sample is not a TypeScript web-runtime guarantee/i, 'static runtime distinction'],
+    ['references/source-and-manifest.md', /runtime enablement has not reached the selected target/i, 'deployed runtime qualification'],
+    ['references/source-and-manifest.md', /Do not switch languages or replace the app to conceal the rejection/i, 'runtime failure transparency'],
     ['references/source-and-manifest.md', /not a successful hosted deployment/i, 'sample completion evidence'],
     ['references/deployment.md', /--commit[^.]*exactly 40 hexadecimal characters[^.]*forwards it/i, 'CLI commit pinning'],
     ['references/deployment.md', /None[^\n]*configured branch/, 'default branch selection'],
@@ -71,6 +75,8 @@ function checkGuidance(skillRoot) {
     ['references/deployment.md', /observed branch SHA, requested commit, built version, activation attempt, active version\/deployment, and real HTTP\/health response/i, 'serving evidence'],
     ['references/deployment.md', /source change may trigger configured automation/i, 'source effects'],
     ['references/operations.md', /Reconciliation is read-only[^.]*must not implicitly resume writes/i, 'read-only reconciliation'],
+    ['references/operations.md', /A transient HTTP 429 during status polling can end the local wait while the accepted operation continues/i, 'polling failure reconciliation'],
+    ['references/operations.md', /Do not assume automatic status-read retries/i, 'polling retry boundary'],
     ['references/operations.md', /changed intent needs a new ID/i, 'retry intent'],
     ['references/operations.md', /Do not promise universal cancellation/i, 'cancellation uncertainty'],
     ['SKILL.md', /public repository is the maintained customer skill home/i, 'public skill ownership'],
@@ -273,8 +279,11 @@ export function validatePlugin(root = repositoryRoot) {
   for (const path of docs) {
     checkLinks(path, root, pluginRoot);
     const content = readFileSync(path, 'utf8');
-    assert(!/https?:\/\/[^\s)"]+\.(?:tgz|tar(?:\.gz)?)(?:[?\s)"`]|$)/i.test(content),
-      `Unapproved CLI distribution URL: ${path}`);
+    for (const [url] of content.matchAll(/https?:\/\/[^\s)"`]+/g)) {
+      if (!/\.(?:tgz|tar(?:\.gz)?|zip)(?:[.?#]|$)/i.test(url)) continue;
+      const asset = url.match(releaseAssetPattern);
+      assert(asset && versionPattern.test(asset[1]), `Unapproved CLI distribution URL: ${path}`);
+    }
     for (const [command] of content.matchAll(/\b(?:npm|pnpm|yarn|bun)\s+(?:install|add|i)\b[^\r\n]*/gi)) {
       assert.equal(command.trim(), archiveInstallCommand, `Unapproved installer command: ${path}`);
     }
@@ -282,7 +291,7 @@ export function validatePlugin(root = repositoryRoot) {
       `Unapproved installer command: ${path}`);
     assert(!/\bbuilder skills install\b/i.test(content),
       `Duplicate skill installer: ${path}`);
-    assert(!/CLI installation is a placeholder|does not require customer \.NET|no current Builder CLI commands for variables/i.test(content),
+    assert(!/CLI installation is a placeholder|does not require customer \.NET|no current Builder CLI commands for variables|this repository does not publish a CLI download URL/i.test(content),
       `Outdated CLI guidance: ${path}`);
     assert(!/\bbuilder manifest (?:propose|generate|repair)\b|--(?:proposal-id|repair-id|resolution)\b|\b(?:ProposalId|RepairId|selectedCandidateIds)\b|\bmanifest rendering\b|\bCLI renders\b/i.test(content),
       `Unshipped manifest authoring guidance: ${path}`);
@@ -296,6 +305,8 @@ export function validatePlugin(root = repositoryRoot) {
     const content = readFileSync(resolve(root, path), 'utf8');
     assert(content.includes(archiveInstallCommand) && content.includes('azure-builder-cli-<version>.tgz') &&
       /preview contact/.test(content), `Missing approved archive installation: ${path}`);
+    assert(content.includes(`](${cliReleases})`), `Missing official CLI release source: ${path}`);
+    assert(content.includes('published SHA-256 checksum'), `Missing archive checksum verification: ${path}`);
   }
   const prereqs = readFileSync(resolve(skillRoot, 'references/prerequisites.md'), 'utf8');
   assert(/stop deployment/i.test(prereqs) && /already-installed approved/.test(prereqs),

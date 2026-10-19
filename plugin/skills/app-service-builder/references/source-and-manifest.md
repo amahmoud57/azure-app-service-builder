@@ -40,7 +40,9 @@ Docker is NOT a security boundary for hostile repositories. Do not run build val
 
 For committed static browser assets, publish only the intended public directory, never a source tree containing secrets or server-only code. Pure static files may need no dependency installation, build, or process startup. Inspect the selected files and describe only checks actually performed; use CLI output rather than inventing a toolchain or manifest.
 
-Honor the user's selected runtime and actual project, not just the available starter. Recognized identifiers include Node, Python, .NET, and PHP; that does not qualify every version, framework, or target. In particular, feature status currently labels a running PHP sample under construction. Confirm exact runtime/version and target readiness before deployment. A web app must serve HTTP on `0.0.0.0` at its declared port, normally `8080`. Inspect actual listener and app-owned health behavior; manifest validation does not implement them.
+Honor the user's selected runtime and actual project, not just the available starter. Recognized identifiers include Node, Python, .NET, and PHP; that does not qualify every version, framework, or target. Confirm exact runtime/version and target readiness before deployment. A web app must serve HTTP on `0.0.0.0` at its declared port, normally `8080`. Inspect actual listener and app-owned health behavior; manifest validation does not implement them.
+
+A successful build does not prove that the selected target can activate that runtime. An unsupported-platform or version rejection can mean runtime enablement has not reached the selected target; preserve the failure and confirm availability with the preview contact. Do not switch languages or replace the app to conceal the rejection. The Node.js prerequisite for running the CLI does not establish Node.js server-runtime availability.
 
 `run.start` is an optional override, not a universal requirement. Custom build output belongs under `$DESTINATION_DIR`. Verify applicable keys against current manifest/runtime docs and the installed version before adding overrides. Do not invent a Dockerfile, dev startup command, framework support, reserved health path, or `/` as a universal health fix. Any configured health route must actually exist and satisfy the documented policy inside its public mount.
 
@@ -50,7 +52,7 @@ At most one static component and one public HTTP component are covered, with com
 
 ## Optional sample-informed preparation
 
-Start with the user's existing framework/runtime and app shape. Use the [published sample catalog](https://builder.appservice.azure.com/docs/samples/) for discovery and context, not as proof of qualification. The live catalog currently has older distribution guidance and descriptions; it does not yet list the standalone public repositories below. Use these public source examples rather than following retired archive or local-sample paths. Do not claim a pending documentation update is already published.
+Start with the user's existing framework/runtime and app shape. Use the [published sample catalog](https://builder.appservice.azure.com/docs/samples/) for discovery and context, not as proof of qualification. The catalog links standalone Azure-Samples repositories. Follow the selected repository's current guidance rather than retired archive or local-sample paths. Do not claim a pending documentation update is already published.
 
 These are a few **verified public source examples**, not an exhaustive catalog or support matrix. Each is a standalone Azure-Samples repository with a root `builder.yaml`, not a subfolder of a platform repository:
 
