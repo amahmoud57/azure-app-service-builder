@@ -37,6 +37,8 @@ Obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the 
 
 Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. Verify the downloaded archive against its published SHA-256 checksum before installation. If an approved asset or trusted checksum is unavailable, ask the preview contact rather than guessing a version or download URL.
 
+The CLI 0.0.1 preview assets are the [portable CLI archive](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz) and its [SHA-256 checksum](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz.sha256).
+
 Install the downloaded local archive, with the user's approval:
 
 ```shell
