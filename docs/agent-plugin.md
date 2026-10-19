@@ -33,9 +33,9 @@ These commands install the **agent plugin**, not the **Builder CLI**. They chang
 
 ## Install Builder CLI separately
 
-Obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or your preview contact. The contact supplies preview access and connection settings. Follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
+Obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or your preview contact. The contact supplies preview access and an approved deployment target. Follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
 
-Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. Verify the downloaded archive against its published SHA-256 checksum before installation. If an approved asset or trusted checksum is unavailable, ask the preview contact rather than guessing a version or download URL.
+Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. Its published SHA-256 checksum is available for integrity checking. Manual checksum verification is optional; an agent can compare the download automatically. A checksum mismatch must stop installation. If an approved asset is unavailable, ask the preview contact rather than guessing a version or download URL.
 
 The CLI 0.0.1 preview assets are the [portable CLI archive](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz) and its [SHA-256 checksum](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz.sha256).
 
@@ -57,7 +57,7 @@ Before local manifest commands, install the required runtime separately if neede
 dotnet --list-runtimes
 ```
 
-Local Git and GitHub CLI, an authorized subscription, an existing resource group, and approved location/connection settings are also required for deployment. Missing prerequisites stop deployment; the plugin does not install or upgrade tooling automatically. The preview contact supplies access and qualification, not this public repository.
+Local Git and GitHub CLI, an authorized subscription, an existing resource group, and an approved location are also required for deployment. Missing prerequisites stop deployment; the plugin does not install or upgrade tooling automatically. The preview contact supplies access and qualification, not this public repository.
 
 The [canonical product docs](https://builder.appservice.azure.com/docs/) and [current feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) govern support, prerequisites, and limitations. The skill consults maintained docs first, uses bundled procedures, and checks installed CLI help for syntax. Public documentation does not change Private Preview access. Local code/manifest inspection can happen before Git initialization or account connection; cloud actions remain gated on readiness and their own scope.
 

@@ -6,14 +6,16 @@ Consult maintained [deployments and versions](https://builder.appservice.azure.c
 
 ## Initialize interactively
 
-Read `builder init --help`, then use the selected pushed source and approved preview location:
+Run initialization from inside an initialized Git worktree for the user's selected app. GitHub sign-in does not select a local repository. Open the app's cloned checkout or change to that directory first; use `git rev-parse --show-toplevel` to verify the location if needed. Do not initialize Git in your home directory to get past the worktree error.
+
+Read `builder init --help`, then start setup from that checkout with the approved preview target.
 
 `builder init` does not automatically analyze or modify `builder.yaml`. Setup does not require a local manifest, a clean worktree, or a local commit matching the pushed branch. It still requires the approved target, management credentials, and source permissions.
 
 Local manifest validation is optional and separate from initialization. Review intended configuration changes and obtain approval before writing, committing, or pushing them. Preserve dirty/unrelated work; do not reset, stash, or change branches to make setup pass. Deploy only the intended pushed source, not uncommitted local changes.
 
 ```shell
-builder init "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --location "<qualified-location>" --repository "<owner>/<repository>" --branch "<branch>"
+builder init
 ```
 
 Review and confirm interactive values. App provisioning, source connection/authorization, and deployment are distinct effects even when `init` combines setup. Initialization is not an explicit deploy or local-source upload. Reuse matching already-configured source; do not reconnect needlessly. A source change may trigger configured automation on targets where enabled: disclose that effect before writing, without promising a working push-deployment workflow in this preview. Preserve successful setup if a later step fails and retry only the missing step.

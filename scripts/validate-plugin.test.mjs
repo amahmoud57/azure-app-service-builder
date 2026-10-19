@@ -31,6 +31,17 @@ test('valid package resolves the shared skill through both hosts', () => {
   });
 });
 
+test('customer sign-in and initialization use the default commands from an app checkout', () => {
+  const prereqs = readFileSync(resolve(root, 'plugin/skills/app-service-builder/references/prerequisites.md'), 'utf8');
+  const deployment = readFileSync(resolve(root, 'plugin/skills/app-service-builder/references/deployment.md'), 'utf8');
+  assert.match(prereqs, /^builder login\r?$/m);
+  assert.doesNotMatch(prereqs, /^builder login .*--tenant/m);
+  assert.match(deployment, /^builder init\r?$/m);
+  assert.match(deployment, /inside an initialized Git worktree/);
+  assert.match(deployment, /GitHub sign-in does not select a local repository/);
+  assert.match(deployment, /Do not initialize Git in your home directory/);
+});
+
 for (const [name, ending] of [['LF', '\n'], ['CRLF', '\r\n']]) {
   test(`accepts ${name} skill frontmatter`, (t) => {
     const directory = fixture(t);
@@ -156,6 +167,14 @@ for (const file of ['docs/agent-plugin.md', 'plugin/skills/app-service-builder/r
     writeFileSync(path, readFileSync(path, 'utf8').replace(
       'published SHA-256 checksum', 'unverified download'));
     assert.throws(() => validatePlugin(directory), /Missing archive checksum verification/);
+  });
+
+  test(`rejects making manual checksum verification mandatory in ${file}`, (t) => {
+    const directory = fixture(t);
+    const path = resolve(directory, file);
+    writeFileSync(path, readFileSync(path, 'utf8').replace(
+      'Manual checksum verification is optional', 'Manual checksum verification is required'));
+    assert.throws(() => validatePlugin(directory), /Missing optional manual checksum guidance/);
   });
 }
 
@@ -320,6 +339,16 @@ const unsafeGuidance = [
   ['blocking init source gates', 'references/deployment.md',
     'does not require a local manifest, a clean worktree, or a local commit matching the pushed branch',
     'requires a manifest and a clean worktree', /init source contract/],
+  ['requiring a tenant in basic sign-in', 'references/prerequisites.md',
+    'builder login', 'builder login --tenant "<tenant-id>"', /customer login default/],
+  ['removing the init Git worktree prerequisite', 'references/deployment.md',
+    'inside an initialized Git worktree', 'from any directory', /init Git worktree/],
+  ['treating GitHub login as a checkout', 'references/deployment.md',
+    'GitHub sign-in does not select a local repository', 'GitHub sign-in selects a local repository',
+    /source login directory boundary/],
+  ['initializing the home directory', 'references/deployment.md',
+    'Do not initialize Git in your home directory', 'Initialize Git in your home directory',
+    /home-directory protection/],
   ['positional app name', 'references/deployment.md',
     'builder app deploy --name "<app-name>"', 'builder app deploy "<app-name>"', /App command requires --name/],
   ['missing variable capability check', 'references/operations.md',

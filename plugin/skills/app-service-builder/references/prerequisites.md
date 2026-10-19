@@ -8,7 +8,7 @@ Consult [Private Preview guidance](https://builder.appservice.azure.com/docs/res
 
 Use an already-installed approved `builder` CLI when available. Otherwise obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or the preview contact and follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
 
-Use the CLI release asset and its published SHA-256 checksum, not GitHub's automatic source-code ZIP or tarball. Compute and compare the local archive's hash before installing it. If an approved asset or trusted checksum is unavailable, ask the preview contact; do not guess a version or download URL.
+Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. Manual checksum verification is optional for customers. When an agent downloads the CLI for a user, compare it with the provided published SHA-256 checksum before installing and stop on a mismatch. If an approved asset or trusted checksum cannot be found, ask the preview contact rather than guessing a version or download URL.
 
 The CLI 0.0.1 preview assets are the [portable CLI archive](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz) and its [SHA-256 checksum](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz.sha256).
 
@@ -34,7 +34,7 @@ If the runtime is missing or incompatible, report the actual requirement and sto
 
 Require local Git and GitHub CLI (`gh`) for source operations. If deployment prerequisites are absent or too old, report them and stop deployment rather than installing or upgrading them automatically.
 
-The preview contact must supply authorization for the subscription and the approved location and connection settings. Use an **existing resource group**. This skill does not invent onboarding, regions, endpoints, platform qualifications, or commands for configuring preview connections.
+The preview contact must supply authorization for the subscription and the approved location. Use an **existing resource group**. This skill does not invent onboarding, regions, endpoints, platform qualifications, or commands for configuring preview connections.
 
 ## Local manifest validation
 
@@ -63,10 +63,10 @@ builder doctor --json
 The intended/selected account, verified identity, and actual target access are different checks. Do not request sign-in if the existing context is already correct. Preserve machine-wide account configuration: do not silently switch global CLI accounts or reuse another account's credential. Do not change tenants, subscriptions, or connections silently. If the confirmed management context needs authentication, consult help and use:
 
 ```shell
-builder login --tenant "<tenant-id>"
+builder login
 ```
 
-`builder login` without a tenant selector is also available; choose only with the user's intended tenant established. Recheck `builder account show` afterward.
+Use `--tenant` only when the user explicitly needs a specific Azure/Entra directory. It is an optional account selector, not a prerequisite for the normal sign-in flow. Recheck `builder account show` afterward.
 
 ## Source authorization is separate
 
@@ -82,4 +82,4 @@ Keep credentials out of chat, manifests, remote URLs, and logs. Inspect only cre
 
 Microsoft management sign-in and GitHub source access do not configure authentication for visitors to the deployed app. There is no current Builder CLI command for deployed-app authentication.
 
-Proceed only when the exact target, approved connection settings, account context, source access, and CLI diagnostics are ready. Never treat a missing prerequisite as a successful readiness check.
+Proceed only when the exact target, account context, source access, and CLI diagnostics are ready. Never treat a missing prerequisite as a successful readiness check.

@@ -50,6 +50,8 @@ function checkGuidance(skillRoot) {
     ['SKILL.md', /If docs cannot be fetched[^.]*do not promote unqualified features/i, 'unavailable docs'],
     ['SKILL.md', /Plan approval[^.]*source publication[^.]*cloud deployment[^.]*distinct permissions/i, 'action scope'],
     ['references/prerequisites.md', /do not silently switch global CLI accounts or reuse another account's credential/i, 'account preservation'],
+    ['references/prerequisites.md', /^builder login\r?$/m, 'customer login default'],
+    ['references/prerequisites.md', /Use `--tenant` only when the user explicitly needs a specific Azure\/Entra directory/i, 'optional tenant boundary'],
     ['references/source-and-manifest.md', /before Git initialization or account connection/i, 'local inspection'],
     ['references/source-and-manifest.md', /Do not scan[^.]*reset, stash, or change branches without approval/i, 'checkout preservation'],
     ['references/source-and-manifest.md', /inspect ancestry/i, 'source ancestry'],
@@ -94,6 +96,10 @@ function checkGuidance(skillRoot) {
     ['references/source-and-manifest.md', /BuilderAnalyzerFailed[^]*exitCode:2[^]*actual exit code and prerequisite message/i, 'analyzer error envelope'],
     ['references/source-and-manifest.md', /Docker\/Oryx: explain the execution and obtain approval first[^]*Docker is NOT a security boundary/i, 'manifest build consent'],
     ['references/deployment.md', /does not automatically analyze or modify `builder\.yaml`/i, 'noninvasive init'],
+    ['references/deployment.md', /^builder init\r?$/m, 'interactive init default'],
+    ['references/deployment.md', /inside an initialized Git worktree/i, 'init Git worktree'],
+    ['references/deployment.md', /GitHub sign-in does not select a local repository/i, 'source login directory boundary'],
+    ['references/deployment.md', /Do not initialize Git in your home directory/i, 'home-directory protection'],
     ['references/deployment.md', /does not require a local manifest, a clean worktree, or a local commit matching the pushed branch/i, 'init source contract'],
     ['references/deployment.md', /`--yes` cannot approve autodetected values/i, 'init explicit noninteractive values'],
     ['references/operations.md', /builder app version-config variables --help/i, 'variable capability discovery'],
@@ -307,6 +313,8 @@ export function validatePlugin(root = repositoryRoot) {
       /preview contact/.test(content), `Missing approved archive installation: ${path}`);
     assert(content.includes(`](${cliReleases})`), `Missing official CLI release source: ${path}`);
     assert(content.includes('published SHA-256 checksum'), `Missing archive checksum verification: ${path}`);
+    assert(content.includes('Manual checksum verification is optional'),
+      `Missing optional manual checksum guidance: ${path}`);
   }
   const prereqs = readFileSync(resolve(skillRoot, 'references/prerequisites.md'), 'utf8');
   assert(/stop deployment/i.test(prereqs) && /already-installed approved/.test(prereqs),
