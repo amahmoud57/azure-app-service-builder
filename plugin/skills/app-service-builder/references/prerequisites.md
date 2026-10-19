@@ -4,19 +4,41 @@ App Service Builder is a **Private Preview** for **development/test**, not produ
 
 Consult [Private Preview guidance](https://builder.appservice.azure.com/docs/resources/preview/) for access, prerequisites, support, and limitations; check [feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) before recommending a workflow. Verify command syntax against the [CLI reference](https://builder.appservice.azure.com/docs/reference/builder-cli/) and installed help. Report disagreements or unavailable docs rather than guessing or relaxing qualification.
 
-## CLI installation: placeholder
+## Install Builder CLI
 
-**CLI installation is a placeholder. No TAR URL, npm package name, or installer command is published by this plugin. Do not execute placeholder installation steps.** Use an already-installed approved `builder` CLI. If it is absent, stop deployment and obtain the approved distribution and instructions from the preview contact. Do not download a lookalike package or infer an installation path.
+Use an already-installed approved `builder` CLI when available. Otherwise obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the preview contact and follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
 
-Require local Node.js >=22, Git, and GitHub CLI (`gh`). If a prerequisite is absent or too old, report it and stop deployment rather than installing or upgrading it automatically.
+After approval to install the downloaded archive:
+
+```shell
+npm install --global "<path-to-downloaded-file.tgz>"
+builder --version
+builder --help
+```
+
+Use the actual approved local file, not the placeholder path. Do not extract the archive, guess a registry package or download URL, or install/upgrade tooling automatically. npm still needs registry access for JavaScript dependencies.
+
+A compatible .NET 10 runtime is required only for local `builder manifest` commands. Login, initialization, and deployment work without .NET. The analyzer is included in the archive and does not require a separate installation. Its generated `Embr.BuildAnalyzer.runtimeconfig.json` specifies the runtime requirement; a .NET SDK is not required.
+
+Before local manifest commands, keep the compatible runtime on PATH and inspect:
+
+```shell
+dotnet --list-runtimes
+```
+
+If the runtime is missing or incompatible, report the actual requirement and stop that local command rather than automatically installing a runtime or a different analyzer. This does not block ordinary CLI login, setup, or deployment.
+
+Require local Git and GitHub CLI (`gh`) for source operations. If deployment prerequisites are absent or too old, report them and stop deployment rather than installing or upgrading them automatically.
 
 The preview contact must supply authorization for the subscription and the approved location and connection settings. Use an **existing resource group**. This skill does not invent onboarding, regions, endpoints, platform qualifications, or commands for configuring preview connections.
 
 ## Manifest capability gate
 
-The manifest workflow described in [source preparation](source-and-manifest.md#cli-owned-manifest-workflow) requires an approved CLI build with that capability. Its availability and OS/CPU package readiness are pending; do not invent a minimum released version or claim universal shipping support. Check `builder --help`, then `builder manifest --help` if listed, and the relevant `propose`, `generate`, `repair`, and `validate` command help before invocation. Verify flags as well as command names. Public docs remain support/availability authority; installed help is command syntax authority. Surface any mismatch rather than proceeding on assumptions.
+Check `builder --help`, then `builder manifest --help` if listed, and the relevant command help before invocation. Verify flags as well as command names. Current preview CLI supports validation of an existing manifest through `builder manifest validate`; inspect `builder manifest validate --help`. Validation does not require proposal, generation, or repair support.
 
-If commands or flags are absent, explain that this workflow needs an approved capable CLI build and stop manifest generation/repair. Read-only app/sample inspection can still help; do not bypass deterministic rendering with hand-written YAML or a replacement framework detector. The native repository analyzer is supplied with a capable CLI on supported OS/CPU combinations; it does not require customer .NET or a separately installed analyzer. Missing native prerequisites/errors must be reported, not solved with guessed installers.
+The authoring workflows in [source preparation](source-and-manifest.md#cli-owned-manifest-workflow) additionally require `propose`, `generate`, or `repair` in installed help. If commands or flags are absent, explain that the requested step needs an approved capable CLI build and stop only that step. Read-only app/sample inspection and available validation can still help; do not bypass deterministic rendering with hand-written YAML or a replacement framework detector. Missing authoring commands must not become a prerequisite for ordinary `builder init`.
+
+Public docs remain support/availability authority; installed help is command syntax authority. Surface any mismatch rather than proceeding on assumptions, and do not infer a released authoring version from this plugin.
 
 Proposal, rendering previews, repair previews, and plan validation are local. Only optional build validation executes repository build scripts; it needs separate execution approval. Neither mode proves preview runtime qualification or hosted success.
 

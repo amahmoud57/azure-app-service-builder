@@ -13,9 +13,14 @@ const referenceNames = [
   'operations.md',
 ];
 const productDocs = 'https://builder.appservice.azure.com/docs/';
+const cliInstallDocs = `${productDocs}quickstarts/builder-cli/`;
+const archiveInstallCommand = 'npm install --global "<path-to-downloaded-file.tgz>"';
 const documentationLinks = {
   'SKILL.md': ['', 'resources/feature-status/', 'samples/'],
-  'references/prerequisites.md': ['resources/preview/', 'resources/feature-status/', 'reference/builder-cli/'],
+  'references/prerequisites.md': [
+    'resources/preview/', 'resources/feature-status/', 'reference/builder-cli/',
+    'quickstarts/builder-cli/',
+  ],
   'references/source-and-manifest.md': [
     'guides/source-control/', 'guides/builder-yaml/', 'reference/runtimes/', 'resources/feature-status/', 'samples/',
   ],
@@ -24,7 +29,7 @@ const documentationLinks = {
   ],
   'references/operations.md': [
     'guides/logging-and-monitoring/', 'troubleshooting/', 'guides/deployments/',
-    'reference/builder-cli/', 'resources/feature-status/',
+    'reference/builder-cli/', 'resources/feature-status/', 'guides/variables/',
   ],
 };
 
@@ -71,7 +76,11 @@ function checkGuidance(skillRoot) {
     ['SKILL.md', /public repository is the maintained customer skill home/i, 'public skill ownership'],
     ['references/prerequisites.md', /builder --help`[^]*builder manifest --help`[^]*command help before invocation/i, 'manifest capability discovery'],
     ['references/prerequisites.md', /If commands or flags are absent[^]*approved capable CLI build/i, 'missing manifest capability'],
-    ['references/prerequisites.md', /does not require customer \.NET or a separately installed analyzer/i, 'bundled analyzer prerequisite'],
+    ['references/prerequisites.md', /compatible \.NET 10 runtime is required only for local `builder manifest` commands/i, 'local manifest runtime prerequisite'],
+    ['references/prerequisites.md', /Login, initialization, and deployment work without \.NET/i, 'optional manifest runtime'],
+    ['references/prerequisites.md', /\.NET SDK is not required/i, 'runtime versus SDK prerequisite'],
+    ['references/prerequisites.md', /analyzer is included[^.]*does not require a separate installation/i, 'bundled analyzer prerequisite'],
+    ['references/prerequisites.md', /Validation does not require proposal, generation, or repair support/i, 'independent validation capability'],
     ['references/source-and-manifest.md', /never substitute agent-written YAML or a second framework detector/i, 'deterministic manifest authority'],
     ['references/source-and-manifest.md', /Samples inform app layout[^.]*CLI renders and validates the actual manifest/i, 'sample renderer coexistence'],
     ['references/source-and-manifest.md', /`needsReview` can exit 0; `blocked` exits 1/i, 'proposal readiness versus exit'],
@@ -82,9 +91,14 @@ function checkGuidance(skillRoot) {
     ['references/source-and-manifest.md', /Do not hand-edit around rejected validators or disable checks/i, 'validator bypass protection'],
     ['references/source-and-manifest.md', /BuilderAnalyzerFailed[^]*exitCode:2[^]*prerequisite failures exit 2/i, 'analyzer error envelope'],
     ['references/source-and-manifest.md', /Docker\/Oryx: explain the execution and obtain approval first[^]*Docker is NOT a security boundary/i, 'manifest build consent'],
-    ['references/deployment.md', /If init writes the manifest, it stops[^]*review `git diff`[^]*commit and push[^]*rerun init/i, 'init review publication rerun'],
-    ['references/deployment.md', /Noninteractive `--yes` cannot approve manifest creation\/repair/i, 'init noninteractive manifest scope'],
-    ['references/deployment.md', /manifest tracked, the entire worktree clean[^]*local HEAD equal to the pushed branch tip[^]*rechecks before cloud mutation/i, 'init source gates'],
+    ['references/deployment.md', /does not automatically analyze or modify `builder\.yaml`/i, 'noninvasive init'],
+    ['references/deployment.md', /does not require a local manifest, a clean worktree, or a local commit matching the pushed branch/i, 'init source contract'],
+    ['references/deployment.md', /`--yes` cannot approve autodetected values/i, 'init explicit noninteractive values'],
+    ['references/operations.md', /builder app version-config variables --help/i, 'variable capability discovery'],
+    ['references/operations.md', /Reads show names, not values/i, 'variable read boundary'],
+    ['references/operations.md', /obtain approval before writing/i, 'variable write approval'],
+    ['references/operations.md', /supplied values and settings files as sensitive[^]*shell history/i, 'variable value privacy'],
+    ['references/operations.md', /without creating a version or deployment[^]*Do not deploy automatically after a variable edit/i, 'variable deployment scope'],
   ];
   for (const [path, pattern, label] of rules) {
     assert(pattern.test(contents[path]), `Missing general-safety invariant: ${label}`);
@@ -113,7 +127,18 @@ function checkGuidance(skillRoot) {
   for (const content of Object.values(contents)) {
     assert(!/https:\/\/builder\.appservice\.azure\.com\/docs\/downloads\/|(?:\.\.\/)?samples\/(?:static-html|nodejs-web|python-web|dotnet-web|vite-static)/i.test(content),
       'Retired sample distribution path');
+    for (const [, command] of content.matchAll(/^builder app ([^\r\n]+)/gm)) {
+      if (/^(?:list|status)\b|--help\b/.test(command)) continue;
+      assert(command.includes('--name "<app-name>"'), `App command requires --name: ${command}`);
+    }
   }
+  const operations = contents['references/operations.md'];
+  for (const command of ['list', 'update', 'delete']) {
+    assert(operations.includes(`builder app version-config variables ${command} --name "<app-name>"`),
+      `Missing variable command: ${command}`);
+  }
+  assert(operations.includes('--settings "@<settings-json-path>"') &&
+    operations.includes('--variable-name "<variable-name>"'), 'Missing variable input flags');
   assert(!/deploy(?:ment)? (?:does not|cannot) pin (?:a )?(?:commit|SHA)/i.test(contents['references/deployment.md']),
     'Incorrect CLI commit-selector limitation');
 }
@@ -230,7 +255,7 @@ export function validatePlugin(root = repositoryRoot) {
   const skillRoot = contained(skillsRoot, './app-service-builder');
   const skillPath = resolve(skillRoot, 'SKILL.md');
   const skill = readFileSync(skillPath, 'utf8');
-  const frontmatter = skill.match(/^---\nname: ([^\n]+)\ndescription: ("[^\n]+")\n---\n/);
+  const frontmatter = skill.match(/^---\r?\nname: ([^\r\n]+)\r?\ndescription: ("[^\r\n]+")\r?\n---\r?\n/);
   assert(frontmatter, 'Expected name and quoted description frontmatter');
   assert.equal(frontmatter[1], 'app-service-builder');
   const description = JSON.parse(frontmatter[2]);
@@ -256,21 +281,32 @@ export function validatePlugin(root = repositoryRoot) {
     ...pluginFiles.filter((path) => path.endsWith('.md')),
     resolve(root, 'README.md'),
     resolve(root, 'docs/agent-plugin.md'),
+    resolve(root, 'CONTRIBUTING.md'),
   ];
   for (const path of docs) {
     checkLinks(path, root, pluginRoot);
     const content = readFileSync(path, 'utf8');
     assert(!/https?:\/\/[^\s)"]+\.(?:tgz|tar(?:\.gz)?)(?:[?\s)"`]|$)/i.test(content),
-      `CLI distribution URL must remain a placeholder: ${path}`);
-    assert(!/\b(?:npm|pnpm|yarn|bun)\s+(?:install|add|i)\b|\bnpx\b|\b(?:curl|wget)\b[^\n]*\|\s*(?:sh|bash)\b/i.test(content),
+      `Unapproved CLI distribution URL: ${path}`);
+    for (const [command] of content.matchAll(/\b(?:npm|pnpm|yarn|bun)\s+(?:install|add|i)\b[^\r\n]*/gi)) {
+      assert.equal(command.trim(), archiveInstallCommand, `Unapproved installer command: ${path}`);
+    }
+    assert(!/\bnpx\b|\b(?:curl|wget)\b[^\n]*\|\s*(?:sh|bash)\b/i.test(content),
       `Unapproved installer command: ${path}`);
     assert(!/\bbuilder skills install\b/i.test(content),
       `Duplicate skill installer: ${path}`);
+    assert(!/CLI installation is a placeholder|does not require customer \.NET|no current Builder CLI commands for variables/i.test(content),
+      `Outdated CLI guidance: ${path}`);
   }
-  for (const path of ['README.md', 'docs/agent-plugin.md', 'plugin/README.md',
+  for (const path of ['README.md', 'CONTRIBUTING.md', 'docs/agent-plugin.md', 'plugin/README.md',
     'plugin/skills/app-service-builder/references/prerequisites.md']) {
-    assert(/CLI installation is a placeholder/.test(readFileSync(resolve(root, path), 'utf8')),
-      `Missing CLI installation placeholder: ${path}`);
+    assert(readFileSync(resolve(root, path), 'utf8').includes(`](${cliInstallDocs})`),
+      `Missing canonical CLI installation guidance: ${path}`);
+  }
+  for (const path of ['docs/agent-plugin.md', 'plugin/skills/app-service-builder/references/prerequisites.md']) {
+    const content = readFileSync(resolve(root, path), 'utf8');
+    assert(content.includes(archiveInstallCommand) && content.includes('azure-builder-cli-<version>.tgz') &&
+      /preview contact/.test(content), `Missing approved archive installation: ${path}`);
   }
   const prereqs = readFileSync(resolve(skillRoot, 'references/prerequisites.md'), 'utf8');
   assert(/stop deployment/i.test(prereqs) && /already-installed approved/.test(prereqs),

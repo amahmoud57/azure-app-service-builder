@@ -12,9 +12,17 @@ Confirm intended changes are committed and pushed to the connected branch. Diffe
 
 ## CLI-owned manifest workflow
 
-First pass the [manifest capability gate](prerequisites.md#manifest-capability-gate). This is conditional guidance for an approved capable build, not a release announcement. The CLI analyzer/renderer/planner is the authority; never substitute agent-written YAML or a second framework detector. Samples inform app layout and unresolved user choices, while the CLI renders and validates the actual manifest.
+First pass the [manifest capability gate](prerequisites.md#manifest-capability-gate) for the requested command. The current preview CLI validates an existing manifest; the authoring steps below are conditional on additional capabilities, not a release announcement. The CLI analyzer/renderer/planner is the authority; never substitute agent-written YAML or a second framework detector. Samples inform app layout and unresolved user choices, while the CLI renders and validates the actual manifest.
 
-Commands are `builder manifest propose [path]`, `generate [path]`, `repair [path]`, and `validate [path]`. Path defaults to `.` and must be an existing directory; deliberately select the app source attachment root. All support `--json` or `--verbose`, mutually exclusive. Proposal uses bounded metadata discovery without executing repository code; generate/repair previews and plan validation are also local, not cloud changes.
+For an existing manifest, check `builder manifest validate --help`, then run:
+
+```shell
+builder manifest validate "<app-source-root>" --json
+```
+
+Path defaults to `.` and must be an existing directory; deliberately select the app source attachment root. Validation is read-only unless you explicitly approve optional `--build` execution. Missing authoring capabilities do not prevent validation.
+
+When installed help exposes `builder manifest propose [path]`, `generate [path]`, or `repair [path]`, follow the corresponding workflow below. Check each command's flags rather than assuming `--verbose` is universal. Proposal uses bounded metadata discovery without executing repository code; generate/repair previews and plan validation are also local, not cloud changes.
 
 ### Missing manifest: propose, preview, approve, write
 
@@ -43,7 +51,7 @@ Use the same approved resolution file for preview and write, if supplied. If evi
 
 ### Existing manifest: validate, repair-preview, approve, write
 
-Run `builder manifest validate "<app-source-root>" --json` first. If invalid, `builder manifest repair "<app-source-root>" --json` is a read-only repair preview. Inspect `Status` (`noChanges`, `ready`, `needsReview`, `blocked`), `NextStep` (`none`, `write`, `provideResolution`, `inspect`, `validate`), `RepairId`, `Changes` (`Path`, `Before`, `After`, `Safety`), `ValidationDiagnostics`, and `Diagnostics`. A safe-change preview exits 1; `noChanges` exits 0. Interpret structured readiness/diagnostics, not every exit 1 as fatal or every exit 0 as permission to write.
+Run `builder manifest validate "<app-source-root>" --json` first. If invalid and installed help exposes repair, `builder manifest repair "<app-source-root>" --json` is a read-only repair preview. If repair is absent, report that limitation and the validation diagnostics rather than invoking an unsupported command. Inspect `Status` (`noChanges`, `ready`, `needsReview`, `blocked`), `NextStep` (`none`, `write`, `provideResolution`, `inspect`, `validate`), `RepairId`, `Changes` (`Path`, `Before`, `After`, `Safety`), `ValidationDiagnostics`, and `Diagnostics`. A safe-change preview exits 1; `noChanges` exits 0. Interpret structured readiness/diagnostics, not every exit 1 as fatal or every exit 0 as permission to write.
 
 When ready, explain errors/evidence, show the exact diff, and get explicit approval:
 

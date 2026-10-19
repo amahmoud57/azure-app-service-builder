@@ -24,7 +24,7 @@ claude plugin install builder@azure-app-service-builder
 
 See [plugin installation and readiness limits](docs/agent-plugin.md) for verification commands and usage.
 
-Plugin installation is separate from Builder CLI installation and full service qualification. **CLI installation is a placeholder**: use an already-installed approved CLI, or stop deployment until the preview contact provides the approved distribution and instructions. No TAR URL, npm package name, or installer command is provided.
+Plugin installation is separate from Builder CLI installation and preview access. Obtain the approved portable `azure-builder-cli-<version>.tgz` archive from your preview contact and follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Node.js 22 or later is required; the separate .NET runtime is only for local manifest commands, not login, initialization, or deployment. Customers do not need the .NET SDK.
 
 ## Share feedback
 
