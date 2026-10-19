@@ -32,15 +32,15 @@ Require local Git and GitHub CLI (`gh`) for source operations. If deployment pre
 
 The preview contact must supply authorization for the subscription and the approved location and connection settings. Use an **existing resource group**. This skill does not invent onboarding, regions, endpoints, platform qualifications, or commands for configuring preview connections.
 
-## Manifest capability gate
+## Local manifest validation
 
-Check `builder --help`, then `builder manifest --help` if listed, and the relevant command help before invocation. Verify flags as well as command names. Current preview CLI supports validation of an existing manifest through `builder manifest validate`; inspect `builder manifest validate --help`. Validation does not require proposal, generation, or repair support.
+Check `builder --help`, then `builder manifest --help`, and the relevant command help before invocation. The CLI checks an existing `builder.yaml`; it does not create or modify it. Inspect `builder manifest validate --help` for the supported path argument, `--json`, and optional `--build`.
 
-The authoring workflows in [source preparation](source-and-manifest.md#cli-owned-manifest-workflow) additionally require `propose`, `generate`, or `repair` in installed help. If commands or flags are absent, explain that the requested step needs an approved capable CLI build and stop only that step. Read-only app/sample inspection and available validation can still help; do not bypass deterministic rendering with hand-written YAML or a replacement framework detector. Missing authoring commands must not become a prerequisite for ordinary `builder init`.
+If validation or a flag is unavailable, report the installed CLI limitation rather than inventing a replacement command. Local validation is optional; it is not a prerequisite for app setup. See [manifest validation](source-and-manifest.md#validate-builderyaml) for the existing-file workflow.
 
-Public docs remain support/availability authority; installed help is command syntax authority. Surface any mismatch rather than proceeding on assumptions, and do not infer a released authoring version from this plugin.
+Public docs remain support/availability authority; installed help is command syntax authority. Surface any mismatch rather than proceeding on assumptions.
 
-Proposal, rendering previews, repair previews, and plan validation are local. Only optional build validation executes repository build scripts; it needs separate execution approval. Neither mode proves preview runtime qualification or hosted success.
+Validation is local and read-only. Only optional build validation executes repository build scripts; it needs separate execution approval. Neither mode proves preview runtime qualification or hosted success.
 
 ## Read-only readiness checks
 

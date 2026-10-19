@@ -75,21 +75,17 @@ function checkGuidance(skillRoot) {
     ['references/operations.md', /Do not promise universal cancellation/i, 'cancellation uncertainty'],
     ['SKILL.md', /public repository is the maintained customer skill home/i, 'public skill ownership'],
     ['references/prerequisites.md', /builder --help`[^]*builder manifest --help`[^]*command help before invocation/i, 'manifest capability discovery'],
-    ['references/prerequisites.md', /If commands or flags are absent[^]*approved capable CLI build/i, 'missing manifest capability'],
+    ['references/prerequisites.md', /If validation or a flag is unavailable[^.]*report the installed CLI limitation/i, 'missing validation capability'],
     ['references/prerequisites.md', /compatible \.NET 10 runtime is required only for local `builder manifest` commands/i, 'local manifest runtime prerequisite'],
     ['references/prerequisites.md', /Login, initialization, and deployment work without \.NET/i, 'optional manifest runtime'],
     ['references/prerequisites.md', /\.NET SDK is not required/i, 'runtime versus SDK prerequisite'],
     ['references/prerequisites.md', /analyzer is included[^.]*does not require a separate installation/i, 'bundled analyzer prerequisite'],
-    ['references/prerequisites.md', /Validation does not require proposal, generation, or repair support/i, 'independent validation capability'],
-    ['references/source-and-manifest.md', /never substitute agent-written YAML or a second framework detector/i, 'deterministic manifest authority'],
-    ['references/source-and-manifest.md', /Samples inform app layout[^.]*CLI renders and validates the actual manifest/i, 'sample renderer coexistence'],
-    ['references/source-and-manifest.md', /`needsReview` can exit 0; `blocked` exits 1/i, 'proposal readiness versus exit'],
-    ['references/source-and-manifest.md', /JSON, not YAML[^]*`proposalId` and `selectedCandidateIds`[^]*only `candidateId`, `name`, `publicPath`, `build`, and `start`/i, 'bounded JSON resolution'],
-    ['references/source-and-manifest.md', /safe-change preview exits 1; `noChanges` exits 0/i, 'repair readiness versus exit'],
-    ['references/source-and-manifest.md', /Repair `--write` requires `--repair-id`; `--repair-id` without `--write` is invalid/i, 'repair write identity'],
-    ['references/source-and-manifest.md', /Stale input must be re-previewed, not bypassed/i, 'stale repair protection'],
-    ['references/source-and-manifest.md', /Do not hand-edit around rejected validators or disable checks/i, 'validator bypass protection'],
-    ['references/source-and-manifest.md', /BuilderAnalyzerFailed[^]*exitCode:2[^]*prerequisite failures exit 2/i, 'analyzer error envelope'],
+    ['references/prerequisites.md', /CLI checks an existing `builder\.yaml`[^.]*does not create or modify it/i, 'shipped validation scope'],
+    ['references/prerequisites.md', /Local validation is optional; it is not a prerequisite for app setup/i, 'optional local validation'],
+    ['references/source-and-manifest.md', /show the exact diff and obtain approval before changing files/i, 'manifest edit approval'],
+    ['references/source-and-manifest.md', /without changing files or executing repository code/i, 'read-only manifest validation'],
+    ['references/source-and-manifest.md', /Do not disable validation or suppress reported diagnostics/i, 'validator bypass protection'],
+    ['references/source-and-manifest.md', /BuilderAnalyzerFailed[^]*exitCode:2[^]*actual exit code and prerequisite message/i, 'analyzer error envelope'],
     ['references/source-and-manifest.md', /Docker\/Oryx: explain the execution and obtain approval first[^]*Docker is NOT a security boundary/i, 'manifest build consent'],
     ['references/deployment.md', /does not automatically analyze or modify `builder\.yaml`/i, 'noninvasive init'],
     ['references/deployment.md', /does not require a local manifest, a clean worktree, or a local commit matching the pushed branch/i, 'init source contract'],
@@ -105,20 +101,11 @@ function checkGuidance(skillRoot) {
   }
   const source = contents['references/source-and-manifest.md'];
   for (const command of [
-    'builder manifest propose "<app-source-root>" --json',
-    'builder manifest generate "<app-source-root>" --proposal-id "<proposal-id>"',
-    'builder manifest generate "<app-source-root>" --write --proposal-id "<same-proposal-id>"',
     'builder manifest validate "<app-source-root>" --json',
-    'builder manifest repair "<app-source-root>" --json',
-    'builder manifest repair "<app-source-root>" --write --repair-id "<repair-id>"',
+    'builder manifest validate "<app-source-root>" --build --json',
   ]) {
-    assert(source.includes(command), `Missing manifest workflow command: ${command}`);
+    assert(source.includes(command), `Missing shipped manifest command: ${command}`);
   }
-  const manifestWriteSections = source.match(/Show the exact proposed[^]*?### Errors/);
-  assert(manifestWriteSections &&
-    /obtain explicit approval before writing/.test(manifestWriteSections[0]) &&
-    /show the exact diff, and get explicit approval/.test(manifestWriteSections[0]),
-  'Manifest writes require preview/diff approval');
   const examples = ['static-html', 'vite', 'nodejs', 'python', 'dotnet'];
   for (const example of examples) {
     assert(source.includes(`](https://github.com/Azure-Samples/app-service-builder-${example})`),
@@ -297,6 +284,8 @@ export function validatePlugin(root = repositoryRoot) {
       `Duplicate skill installer: ${path}`);
     assert(!/CLI installation is a placeholder|does not require customer \.NET|no current Builder CLI commands for variables/i.test(content),
       `Outdated CLI guidance: ${path}`);
+    assert(!/\bbuilder manifest (?:propose|generate|repair)\b|--(?:proposal-id|repair-id|resolution)\b|\b(?:ProposalId|RepairId|selectedCandidateIds)\b|\bmanifest rendering\b|\bCLI renders\b/i.test(content),
+      `Unshipped manifest authoring guidance: ${path}`);
   }
   for (const path of ['README.md', 'CONTRIBUTING.md', 'docs/agent-plugin.md', 'plugin/README.md',
     'plugin/skills/app-service-builder/references/prerequisites.md']) {

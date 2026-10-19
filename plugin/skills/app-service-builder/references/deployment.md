@@ -10,7 +10,7 @@ Read `builder init --help`, then use the selected pushed source and approved pre
 
 `builder init` does not automatically analyze or modify `builder.yaml`. Setup does not require a local manifest, a clean worktree, or a local commit matching the pushed branch. It still requires the approved target, management credentials, and source permissions.
 
-Manifest validation and any capability-gated authoring are explicit, separate commands. Review intended configuration changes and obtain approval before writing, committing, or pushing them. Preserve dirty/unrelated work; do not reset, stash, or change branches to make setup pass. Deploy only the intended pushed source, not uncommitted local changes.
+Local manifest validation is optional and separate from initialization. Review intended configuration changes and obtain approval before writing, committing, or pushing them. Preserve dirty/unrelated work; do not reset, stash, or change branches to make setup pass. Deploy only the intended pushed source, not uncommitted local changes.
 
 ```shell
 builder init "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --location "<qualified-location>" --repository "<owner>/<repository>" --branch "<branch>"

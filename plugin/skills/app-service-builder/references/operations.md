@@ -6,7 +6,7 @@ Consult maintained [logging and monitoring](https://builder.appservice.azure.com
 
 ## Inspect apps and history
 
-First identify the failing boundary: manifest/parser/topology diagnostics versus candidate/planner readiness. Use the capability-gated [manifest validation/repair workflow](source-and-manifest.md#cli-owned-manifest-workflow) before cloud retries; inspect actual JSON status, diagnostics, and error envelopes rather than exit code alone. Only run optional build validation after explaining script execution and obtaining approval. Then distinguish cloud build failure, activation failure, and actual runtime HTTP behavior; local validation does not prove runtime/version/preview qualification.
+First distinguish local manifest diagnostics from cloud build failure, activation failure, and actual runtime HTTP behavior. Use [manifest validation](source-and-manifest.md#validate-builderyaml) to check an existing file and inspect its actual diagnostics and error envelope. Only run optional build validation after explaining script execution and obtaining approval. Local validation does not prove runtime/version/preview qualification.
 
 ```shell
 builder app list --subscription "<subscription-id>" --json

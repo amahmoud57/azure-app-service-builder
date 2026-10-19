@@ -1,13 +1,13 @@
 ---
 name: app-service-builder
-description: "Use for explicit App Service Builder requests: prepare builder.yaml, initialize a Builder app from a GitHub repository, deploy pushed source, manage desired app variables, inspect build/deployment history, or recover a retained version. Requires authorized Private Preview access for development/test. Not for ordinary Azure App Service, Azure Container Apps, or internal platform operations. A generic 'deploy my app' request must first select the product and target."
+description: "Use for explicit App Service Builder requests: check builder.yaml, initialize a Builder app from a GitHub repository, deploy pushed source, manage desired app variables, inspect build/deployment history, or recover a retained version. Requires authorized Private Preview access for development/test. Not for ordinary Azure App Service, Azure Container Apps, or internal platform operations. A generic 'deploy my app' request must first select the product and target."
 ---
 
 # App Service Builder
 
 Help authorized customers use the `builder` CLI for **Private Preview development/test**, not production. Plugin installation does not grant preview access, install the CLI, qualify a location, or make the service publicly available.
 
-This public repository is the maintained customer skill home; the CLI supplies executable manifest analysis/rendering/validation, not a second skill installation route. No private checkout is required.
+This public repository is the maintained customer skill home; the CLI supplies existing-manifest validation and app operations, not a second skill installation route. No private checkout is required.
 
 ## Before acting
 
@@ -24,7 +24,7 @@ Use the [canonical product documentation](https://builder.appservice.azure.com/d
 | Task | Read before executing |
 | --- | --- |
 | Check access, CLI readiness, and source authorization | [Prerequisites and readiness](references/prerequisites.md) |
-| Prepare app layout using optional samples; capability-check CLI manifest proposal, rendering, repair, and validation | [Source and manifest](references/source-and-manifest.md) |
+| Inspect app layout, use optional samples, and validate an existing builder.yaml | [Source and manifest](references/source-and-manifest.md) |
 | Initialize, deploy, and verify the serving app | [Deployment](references/deployment.md) |
 | Inspect failures/history, manage desired variables, recover, or delete | [Operations](references/operations.md) |
 
@@ -32,7 +32,7 @@ Read the relevant reference in full. All command examples have descriptive place
 
 For a starting point, detect the existing framework/runtime and static versus HTTP shape first. Use the [published sample catalog](https://builder.appservice.azure.com/docs/samples/) for context and the verified public examples in the source reference; inspect the selected sample's current README, root `builder.yaml`, and relevant project/startup/health files before proposing small adaptations. Preserve existing source instead of requiring a fork. Source examples do not override current availability warnings.
 
-Before manifest commands, check installed help for the specific capability. Current preview CLI validation of an existing manifest does not imply proposal, generation, or repair support. A capable CLI renders and validates the actual manifest: do not hand-write YAML or implement a replacement detector if authoring is absent. Read proposal/repair JSON, preview the exact output/diff, and obtain approval before writes or build execution.
+Use `builder manifest validate` to check an existing manifest. It does not create or change the file. Use the maintained manifest guide and selected sample for configuration guidance; do not guess unsupported fields or framework settings. Any user-requested file edits need a reviewed diff and approval. Optional build execution needs separate approval.
 
 ## Boundaries and completion
 
