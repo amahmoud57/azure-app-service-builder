@@ -6,22 +6,50 @@ Consult maintained [logging and monitoring](https://builder.appservice.azure.com
 
 ## Inspect apps and history
 
-First identify the failing boundary: manifest/parser/topology diagnostics versus candidate/planner readiness. Use the capability-gated [manifest validation/repair workflow](source-and-manifest.md#cli-owned-manifest-workflow) before cloud retries; inspect actual JSON status, diagnostics, and error envelopes rather than exit code alone. Only run optional build validation after explaining script execution and obtaining approval. Then distinguish cloud build failure, activation failure, and actual runtime HTTP behavior; local validation does not prove runtime/version/preview qualification.
+First distinguish local manifest diagnostics from cloud build failure, activation failure, and actual runtime HTTP behavior. Use [manifest validation](source-and-manifest.md#validate-builderyaml) to check an existing file and inspect its actual diagnostics and error envelope. Only run optional build validation after explaining script execution and obtaining approval. Local validation does not prove runtime/version/preview qualification.
 
 ```shell
 builder app list --subscription "<subscription-id>" --json
-builder app show "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
-builder app version list "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
-builder app version show "<app-name>" "<version-id>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
-builder app version build-log "<app-name>" "<version-id>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
-builder app deployment list "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
-builder app deployment show "<app-name>" "<deployment-id>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
-builder app deploymentlog "<app-name>" "<deployment-id>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+builder app show --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+builder app version list --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+builder app version show "<version-id>" --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+builder app version build-log "<version-id>" --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+builder app deployment list --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+builder app deployment show "<deployment-id>" --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+builder app deploymentlog "<deployment-id>" --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
 ```
 
 Version and deployment IDs must come from actual history. Use build logs to diagnose build failure and deployment logs to diagnose activation failure. `version build-log` can select `--component "<component>"` when needed. These commands are not runtime log streaming or live HTTP metrics; do not invent equivalent CLI commands.
 
+## Manage desired variables
+
+Consult [application variables](https://builder.appservice.azure.com/docs/guides/variables/) and check `builder app version-config variables --help`, then the relevant command-specific help. If a command or flag is absent, report the installed CLI limitation rather than guessing a replacement.
+
+Read the confirmed app's saved variable names:
+
+```shell
+builder app version-config variables list --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+```
+
+Reads show names, not values. Do not claim that a name-only response verifies a saved value. Treat supplied values and settings files as sensitive; keep them out of chat, source control, shell history, and public feedback.
+
+For a requested update, explain the affected names and obtain approval before writing. Use an approved local JSON file containing an object of variable names to string values:
+
+```shell
+builder app version-config variables update --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --settings "@<settings-json-path>" --json
+```
+
+Use the user's actual approved file; do not read unrelated secret files or create a settings file without permission. The update merges supplied variables with the existing configuration. Delete only an explicitly approved name:
+
+```shell
+builder app version-config variables delete --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --variable-name "<variable-name>" --json
+```
+
+Variable writes change desired configuration without creating a version or deployment. A separate approved build/deployment captures the new values; activating a retained version keeps its frozen configuration. Do not deploy automatically after a variable edit.
+
 ## Uncertain writes and retries
+
+A transient HTTP 429 during status polling can end the local wait while the accepted operation continues. Do not assume automatic status-read retries or repeat a deployment to work around throttling.
 
 A timeout, cancellation, or lost response does not prove a failed or cancelled server operation. Retain the exact target, request ID, returned operation URL, and known version/deployment IDs without exposing secrets. Inspect the actual app/source state, returned operation, and deployment history before retrying:
 
@@ -38,7 +66,7 @@ Only after reconciliation and within the approved action, retry identical CLI de
 Inspect the actual intended retained version and establish that it is ready and eligible. Explain the app, subscription, resource group, target version, and activation action; obtain user approval before rollback:
 
 ```shell
-builder app deploy "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --version "<version-id>"
+builder app deploy --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --version "<version-id>"
 ```
 
 Alternatively, use `--previous` only after inspecting which retained target it will activate and getting approval. Do not combine selectors. Retained-version activation does not rebuild local changes or overwrite retained versions. Do not require fresh source authorization merely to activate retained content.
@@ -52,7 +80,7 @@ Inspect the exact target first and explain the consequence. **Ask for explicit a
 After approval, retain the CLI's confirmation:
 
 ```shell
-builder app delete "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>"
+builder app delete --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>"
 ```
 
 Do not bypass confirmation with `--yes` or `-y` in normal examples, automatically delete the resource group, or remove separately owned resources/data as a follow-on action.

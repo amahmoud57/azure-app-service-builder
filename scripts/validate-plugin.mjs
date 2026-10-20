@@ -13,9 +13,16 @@ const referenceNames = [
   'operations.md',
 ];
 const productDocs = 'https://builder.appservice.azure.com/docs/';
+const cliInstallDocs = `${productDocs}quickstarts/builder-cli/`;
+const cliReleases = 'https://github.com/microsoft/azure-app-service-builder/releases';
+const releaseAssetPattern = /^https:\/\/github\.com\/microsoft\/azure-app-service-builder\/releases\/download\/[A-Za-z0-9._-]+\/azure-builder-cli-(.+)\.tgz(?:\.sha256)?$/;
+const archiveInstallCommand = 'npm install --global "<path-to-downloaded-file.tgz>"';
 const documentationLinks = {
   'SKILL.md': ['', 'resources/feature-status/', 'samples/'],
-  'references/prerequisites.md': ['resources/preview/', 'resources/feature-status/', 'reference/builder-cli/'],
+  'references/prerequisites.md': [
+    'resources/preview/', 'resources/feature-status/', 'reference/builder-cli/',
+    'quickstarts/builder-cli/',
+  ],
   'references/source-and-manifest.md': [
     'guides/source-control/', 'guides/builder-yaml/', 'reference/runtimes/', 'resources/feature-status/', 'samples/',
   ],
@@ -24,7 +31,7 @@ const documentationLinks = {
   ],
   'references/operations.md': [
     'guides/logging-and-monitoring/', 'troubleshooting/', 'guides/deployments/',
-    'reference/builder-cli/', 'resources/feature-status/',
+    'reference/builder-cli/', 'resources/feature-status/', 'guides/variables/',
   ],
 };
 
@@ -43,6 +50,8 @@ function checkGuidance(skillRoot) {
     ['SKILL.md', /If docs cannot be fetched[^.]*do not promote unqualified features/i, 'unavailable docs'],
     ['SKILL.md', /Plan approval[^.]*source publication[^.]*cloud deployment[^.]*distinct permissions/i, 'action scope'],
     ['references/prerequisites.md', /do not silently switch global CLI accounts or reuse another account's credential/i, 'account preservation'],
+    ['references/prerequisites.md', /^builder login\r?$/m, 'customer login default'],
+    ['references/prerequisites.md', /Use `--tenant` only when the user explicitly needs a specific Azure\/Entra directory/i, 'optional tenant boundary'],
     ['references/source-and-manifest.md', /before Git initialization or account connection/i, 'local inspection'],
     ['references/source-and-manifest.md', /Do not scan[^.]*reset, stash, or change branches without approval/i, 'checkout preservation'],
     ['references/source-and-manifest.md', /inspect ancestry/i, 'source ancestry'],
@@ -58,6 +67,8 @@ function checkGuidance(skillRoot) {
     ['references/source-and-manifest.md', /Disclose discrepancies between production docs and current sample README/i, 'sample documentation drift'],
     ['references/source-and-manifest.md', /not vendored into the plugin or fetched by packaging tests\/builds/i, 'offline sample boundary'],
     ['references/source-and-manifest.md', /static Vite sample is not a TypeScript web-runtime guarantee/i, 'static runtime distinction'],
+    ['references/source-and-manifest.md', /runtime enablement has not reached the selected target/i, 'deployed runtime qualification'],
+    ['references/source-and-manifest.md', /Do not switch languages or replace the app to conceal the rejection/i, 'runtime failure transparency'],
     ['references/source-and-manifest.md', /not a successful hosted deployment/i, 'sample completion evidence'],
     ['references/deployment.md', /--commit[^.]*exactly 40 hexadecimal characters[^.]*forwards it/i, 'CLI commit pinning'],
     ['references/deployment.md', /None[^\n]*configured branch/, 'default branch selection'],
@@ -66,45 +77,47 @@ function checkGuidance(skillRoot) {
     ['references/deployment.md', /observed branch SHA, requested commit, built version, activation attempt, active version\/deployment, and real HTTP\/health response/i, 'serving evidence'],
     ['references/deployment.md', /source change may trigger configured automation/i, 'source effects'],
     ['references/operations.md', /Reconciliation is read-only[^.]*must not implicitly resume writes/i, 'read-only reconciliation'],
+    ['references/operations.md', /A transient HTTP 429 during status polling can end the local wait while the accepted operation continues/i, 'polling failure reconciliation'],
+    ['references/operations.md', /Do not assume automatic status-read retries/i, 'polling retry boundary'],
     ['references/operations.md', /changed intent needs a new ID/i, 'retry intent'],
     ['references/operations.md', /Do not promise universal cancellation/i, 'cancellation uncertainty'],
     ['SKILL.md', /public repository is the maintained customer skill home/i, 'public skill ownership'],
     ['references/prerequisites.md', /builder --help`[^]*builder manifest --help`[^]*command help before invocation/i, 'manifest capability discovery'],
-    ['references/prerequisites.md', /If commands or flags are absent[^]*approved capable CLI build/i, 'missing manifest capability'],
-    ['references/prerequisites.md', /does not require customer \.NET or a separately installed analyzer/i, 'bundled analyzer prerequisite'],
-    ['references/source-and-manifest.md', /never substitute agent-written YAML or a second framework detector/i, 'deterministic manifest authority'],
-    ['references/source-and-manifest.md', /Samples inform app layout[^.]*CLI renders and validates the actual manifest/i, 'sample renderer coexistence'],
-    ['references/source-and-manifest.md', /`needsReview` can exit 0; `blocked` exits 1/i, 'proposal readiness versus exit'],
-    ['references/source-and-manifest.md', /JSON, not YAML[^]*`proposalId` and `selectedCandidateIds`[^]*only `candidateId`, `name`, `publicPath`, `build`, and `start`/i, 'bounded JSON resolution'],
-    ['references/source-and-manifest.md', /safe-change preview exits 1; `noChanges` exits 0/i, 'repair readiness versus exit'],
-    ['references/source-and-manifest.md', /Repair `--write` requires `--repair-id`; `--repair-id` without `--write` is invalid/i, 'repair write identity'],
-    ['references/source-and-manifest.md', /Stale input must be re-previewed, not bypassed/i, 'stale repair protection'],
-    ['references/source-and-manifest.md', /Do not hand-edit around rejected validators or disable checks/i, 'validator bypass protection'],
-    ['references/source-and-manifest.md', /BuilderAnalyzerFailed[^]*exitCode:2[^]*prerequisite failures exit 2/i, 'analyzer error envelope'],
+    ['references/prerequisites.md', /If validation or a flag is unavailable[^.]*report the installed CLI limitation/i, 'missing validation capability'],
+    ['references/prerequisites.md', /compatible \.NET 10 runtime is required only for local `builder manifest` commands/i, 'local manifest runtime prerequisite'],
+    ['references/prerequisites.md', /Login, initialization, and deployment work without \.NET/i, 'optional manifest runtime'],
+    ['references/prerequisites.md', /\.NET SDK is not required/i, 'runtime versus SDK prerequisite'],
+    ['references/prerequisites.md', /analyzer is included[^.]*does not require a separate installation/i, 'bundled analyzer prerequisite'],
+    ['references/prerequisites.md', /CLI checks an existing `builder\.yaml`[^.]*does not create or modify it/i, 'shipped validation scope'],
+    ['references/prerequisites.md', /Local validation is optional; it is not a prerequisite for app setup/i, 'optional local validation'],
+    ['references/source-and-manifest.md', /show the exact diff and obtain approval before changing files/i, 'manifest edit approval'],
+    ['references/source-and-manifest.md', /without changing files or executing repository code/i, 'read-only manifest validation'],
+    ['references/source-and-manifest.md', /Do not disable validation or suppress reported diagnostics/i, 'validator bypass protection'],
+    ['references/source-and-manifest.md', /BuilderAnalyzerFailed[^]*exitCode:2[^]*actual exit code and prerequisite message/i, 'analyzer error envelope'],
     ['references/source-and-manifest.md', /Docker\/Oryx: explain the execution and obtain approval first[^]*Docker is NOT a security boundary/i, 'manifest build consent'],
-    ['references/deployment.md', /If init writes the manifest, it stops[^]*review `git diff`[^]*commit and push[^]*rerun init/i, 'init review publication rerun'],
-    ['references/deployment.md', /Noninteractive `--yes` cannot approve manifest creation\/repair/i, 'init noninteractive manifest scope'],
-    ['references/deployment.md', /manifest tracked, the entire worktree clean[^]*local HEAD equal to the pushed branch tip[^]*rechecks before cloud mutation/i, 'init source gates'],
+    ['references/deployment.md', /does not automatically analyze or modify `builder\.yaml`/i, 'noninvasive init'],
+    ['references/deployment.md', /^builder init\r?$/m, 'interactive init default'],
+    ['references/deployment.md', /inside an initialized Git worktree/i, 'init Git worktree'],
+    ['references/deployment.md', /GitHub sign-in does not select a local repository/i, 'source login directory boundary'],
+    ['references/deployment.md', /Do not initialize Git in your home directory/i, 'home-directory protection'],
+    ['references/deployment.md', /does not require a local manifest, a clean worktree, or a local commit matching the pushed branch/i, 'init source contract'],
+    ['references/deployment.md', /`--yes` cannot approve autodetected values/i, 'init explicit noninteractive values'],
+    ['references/operations.md', /builder app version-config variables --help/i, 'variable capability discovery'],
+    ['references/operations.md', /Reads show names, not values/i, 'variable read boundary'],
+    ['references/operations.md', /obtain approval before writing/i, 'variable write approval'],
+    ['references/operations.md', /supplied values and settings files as sensitive[^]*shell history/i, 'variable value privacy'],
+    ['references/operations.md', /without creating a version or deployment[^]*Do not deploy automatically after a variable edit/i, 'variable deployment scope'],
   ];
   for (const [path, pattern, label] of rules) {
     assert(pattern.test(contents[path]), `Missing general-safety invariant: ${label}`);
   }
   const source = contents['references/source-and-manifest.md'];
   for (const command of [
-    'builder manifest propose "<app-source-root>" --json',
-    'builder manifest generate "<app-source-root>" --proposal-id "<proposal-id>"',
-    'builder manifest generate "<app-source-root>" --write --proposal-id "<same-proposal-id>"',
     'builder manifest validate "<app-source-root>" --json',
-    'builder manifest repair "<app-source-root>" --json',
-    'builder manifest repair "<app-source-root>" --write --repair-id "<repair-id>"',
+    'builder manifest validate "<app-source-root>" --build --json',
   ]) {
-    assert(source.includes(command), `Missing manifest workflow command: ${command}`);
+    assert(source.includes(command), `Missing shipped manifest command: ${command}`);
   }
-  const manifestWriteSections = source.match(/Show the exact proposed[^]*?### Errors/);
-  assert(manifestWriteSections &&
-    /obtain explicit approval before writing/.test(manifestWriteSections[0]) &&
-    /show the exact diff, and get explicit approval/.test(manifestWriteSections[0]),
-  'Manifest writes require preview/diff approval');
   const examples = ['static-html', 'vite', 'nodejs', 'python', 'dotnet'];
   for (const example of examples) {
     assert(source.includes(`](https://github.com/Azure-Samples/app-service-builder-${example})`),
@@ -113,7 +126,18 @@ function checkGuidance(skillRoot) {
   for (const content of Object.values(contents)) {
     assert(!/https:\/\/builder\.appservice\.azure\.com\/docs\/downloads\/|(?:\.\.\/)?samples\/(?:static-html|nodejs-web|python-web|dotnet-web|vite-static)/i.test(content),
       'Retired sample distribution path');
+    for (const [, command] of content.matchAll(/^builder app ([^\r\n]+)/gm)) {
+      if (/^(?:list|status)\b|--help\b/.test(command)) continue;
+      assert(command.includes('--name "<app-name>"'), `App command requires --name: ${command}`);
+    }
   }
+  const operations = contents['references/operations.md'];
+  for (const command of ['list', 'update', 'delete']) {
+    assert(operations.includes(`builder app version-config variables ${command} --name "<app-name>"`),
+      `Missing variable command: ${command}`);
+  }
+  assert(operations.includes('--settings "@<settings-json-path>"') &&
+    operations.includes('--variable-name "<variable-name>"'), 'Missing variable input flags');
   assert(!/deploy(?:ment)? (?:does not|cannot) pin (?:a )?(?:commit|SHA)/i.test(contents['references/deployment.md']),
     'Incorrect CLI commit-selector limitation');
 }
@@ -230,7 +254,7 @@ export function validatePlugin(root = repositoryRoot) {
   const skillRoot = contained(skillsRoot, './app-service-builder');
   const skillPath = resolve(skillRoot, 'SKILL.md');
   const skill = readFileSync(skillPath, 'utf8');
-  const frontmatter = skill.match(/^---\nname: ([^\n]+)\ndescription: ("[^\n]+")\n---\n/);
+  const frontmatter = skill.match(/^---\r?\nname: ([^\r\n]+)\r?\ndescription: ("[^\r\n]+")\r?\n---\r?\n/);
   assert(frontmatter, 'Expected name and quoted description frontmatter');
   assert.equal(frontmatter[1], 'app-service-builder');
   const description = JSON.parse(frontmatter[2]);
@@ -256,21 +280,41 @@ export function validatePlugin(root = repositoryRoot) {
     ...pluginFiles.filter((path) => path.endsWith('.md')),
     resolve(root, 'README.md'),
     resolve(root, 'docs/agent-plugin.md'),
+    resolve(root, 'CONTRIBUTING.md'),
   ];
   for (const path of docs) {
     checkLinks(path, root, pluginRoot);
     const content = readFileSync(path, 'utf8');
-    assert(!/https?:\/\/[^\s)"]+\.(?:tgz|tar(?:\.gz)?)(?:[?\s)"`]|$)/i.test(content),
-      `CLI distribution URL must remain a placeholder: ${path}`);
-    assert(!/\b(?:npm|pnpm|yarn|bun)\s+(?:install|add|i)\b|\bnpx\b|\b(?:curl|wget)\b[^\n]*\|\s*(?:sh|bash)\b/i.test(content),
+    for (const [url] of content.matchAll(/https?:\/\/[^\s)"`]+/g)) {
+      if (!/\.(?:tgz|tar(?:\.gz)?|zip)(?:[.?#]|$)/i.test(url)) continue;
+      const asset = url.match(releaseAssetPattern);
+      assert(asset && versionPattern.test(asset[1]), `Unapproved CLI distribution URL: ${path}`);
+    }
+    for (const [command] of content.matchAll(/\b(?:npm|pnpm|yarn|bun)\s+(?:install|add|i)\b[^\r\n]*/gi)) {
+      assert.equal(command.trim(), archiveInstallCommand, `Unapproved installer command: ${path}`);
+    }
+    assert(!/\bnpx\b|\b(?:curl|wget)\b[^\n]*\|\s*(?:sh|bash)\b/i.test(content),
       `Unapproved installer command: ${path}`);
     assert(!/\bbuilder skills install\b/i.test(content),
       `Duplicate skill installer: ${path}`);
+    assert(!/CLI installation is a placeholder|does not require customer \.NET|no current Builder CLI commands for variables|this repository does not publish a CLI download URL/i.test(content),
+      `Outdated CLI guidance: ${path}`);
+    assert(!/\bbuilder manifest (?:propose|generate|repair)\b|--(?:proposal-id|repair-id|resolution)\b|\b(?:ProposalId|RepairId|selectedCandidateIds)\b|\bmanifest rendering\b|\bCLI renders\b/i.test(content),
+      `Unshipped manifest authoring guidance: ${path}`);
   }
-  for (const path of ['README.md', 'docs/agent-plugin.md', 'plugin/README.md',
+  for (const path of ['README.md', 'CONTRIBUTING.md', 'docs/agent-plugin.md', 'plugin/README.md',
     'plugin/skills/app-service-builder/references/prerequisites.md']) {
-    assert(/CLI installation is a placeholder/.test(readFileSync(resolve(root, path), 'utf8')),
-      `Missing CLI installation placeholder: ${path}`);
+    assert(readFileSync(resolve(root, path), 'utf8').includes(`](${cliInstallDocs})`),
+      `Missing canonical CLI installation guidance: ${path}`);
+  }
+  for (const path of ['docs/agent-plugin.md', 'plugin/skills/app-service-builder/references/prerequisites.md']) {
+    const content = readFileSync(resolve(root, path), 'utf8');
+    assert(content.includes(archiveInstallCommand) && content.includes('azure-builder-cli-<version>.tgz') &&
+      /preview contact/.test(content), `Missing approved archive installation: ${path}`);
+    assert(content.includes(`](${cliReleases})`), `Missing official CLI release source: ${path}`);
+    assert(content.includes('published SHA-256 checksum'), `Missing archive checksum verification: ${path}`);
+    assert(content.includes('Manual checksum verification is optional'),
+      `Missing optional manual checksum guidance: ${path}`);
   }
   const prereqs = readFileSync(resolve(skillRoot, 'references/prerequisites.md'), 'utf8');
   assert(/stop deployment/i.test(prereqs) && /already-installed approved/.test(prereqs),

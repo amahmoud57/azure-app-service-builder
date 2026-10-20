@@ -6,31 +6,35 @@ Consult maintained [deployments and versions](https://builder.appservice.azure.c
 
 ## Initialize interactively
 
-Read `builder init --help`, then use the selected pushed source and approved preview location:
+Run initialization from inside an initialized Git worktree for the user's selected app. GitHub sign-in does not select a local repository. Open the app's cloned checkout or change to that directory first; use `git rev-parse --show-toplevel` to verify the location if needed. Do not initialize Git in your home directory to get past the worktree error.
 
-For a CLI build with the [manifest capability](prerequisites.md#manifest-capability-gate), `init` validates or interactively proposes/repairs `builder.yaml` before authentication or cloud work. If init writes the manifest, it stops: review `git diff`, obtain approval to commit and push the intended changes, then rerun init. Noninteractive `--yes` cannot approve manifest creation/repair. Do not automatically commit/push, discard dirty work, or call that early stop successful cloud setup/deployment.
+Read `builder init --help`, then start setup from that checkout with the approved preview target.
 
-This init flow requires the manifest tracked, the entire worktree clean, the selected `github.com` origin and branch matching intended source, and local HEAD equal to the pushed branch tip. It rechecks before cloud mutation. If any gate fails, preserve unrelated work and resolve only within user-approved scope; do not reset/stash/change branches or accounts to force the check through. A valid local plan remains distinct from source publication, setup, and deployment.
+`builder init` does not automatically analyze or modify `builder.yaml`. Setup does not require a local manifest, a clean worktree, or a local commit matching the pushed branch. It still requires the approved target, management credentials, and source permissions.
+
+Local manifest validation is optional and separate from initialization. Review intended configuration changes and obtain approval before writing, committing, or pushing them. Preserve dirty/unrelated work; do not reset, stash, or change branches to make setup pass. Deploy only the intended pushed source, not uncommitted local changes.
 
 ```shell
-builder init "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --location "<qualified-location>" --repository "<owner>/<repository>" --branch "<branch>"
+builder init
 ```
 
 Review and confirm interactive values. App provisioning, source connection/authorization, and deployment are distinct effects even when `init` combines setup. Initialization is not an explicit deploy or local-source upload. Reuse matching already-configured source; do not reconnect needlessly. A source change may trigger configured automation on targets where enabled: disclose that effect before writing, without promising a working push-deployment workflow in this preview. Preserve successful setup if a later step fails and retry only the missing step.
 
 Initialization does not create a saved local app binding: subsequent commands still require app name, subscription, and resource group. For a selected non-root source attachment, inspect current source settings and use the documented `builder app source connect github` flow and its `--root-directory` option only after checking installed help and confirming scope; the init example above must not silently attach the wrong root.
 
-This guide intentionally uses interactive initialization. Noninteractive initialization additionally needs the numeric repository ID, all explicit values, pre-established accounts, and `--yes`; it is not a way to approve guessed values. Do not turn this example into an unattended setup promise.
+This guide intentionally uses interactive initialization. Noninteractive initialization additionally needs the numeric repository ID, all explicit values, pre-established accounts, and `--yes`; `--yes` cannot approve autodetected values. Do not turn this example into an unattended setup promise.
 
 ## Deploy pushed source
 
 Read `builder app deploy --help` and inspect the intended source/target before deployment:
 
 ```shell
-builder app deploy "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>"
+builder app deploy --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>"
 ```
 
-Deployment waits by default. Use at most one selector:
+Deployment waits by default. If a status read fails, including HTTP 429, follow [uncertain-write reconciliation](operations.md#uncertain-writes-and-retries) before considering another deployment. A failed local wait does not establish that the server operation failed.
+
+Use at most one selector:
 
 | Selector | Requested content |
 | --- | --- |
@@ -57,7 +61,7 @@ The operation URL must be the actual returned service value under the approved c
 Inspect the deployed app:
 
 ```shell
-builder app show "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
+builder app show --name "<app-name>" --subscription "<subscription-id>" --resource-group "<resource-group>" --json
 ```
 
 Distinguish the observed branch SHA, requested commit, built version, activation attempt, active version/deployment, and real HTTP/health response. A moving branch or newer failed attempt does not identify what currently serves.

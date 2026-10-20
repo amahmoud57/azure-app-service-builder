@@ -4,7 +4,7 @@ The `builder` plugin provides one customer-facing skill, `app-service-builder`, 
 
 Plugin distribution does not grant preview access or announce public service availability. It is a repository-hosted marketplace, not admission to a curated plugin directory.
 
-This public repository is the maintained customer skill home. The Builder CLI owns executable proposal/render/repair/validation logic; it is not a second skill distribution route and does not require a private checkout. Install the customer skill through the marketplace below, not an additional CLI-bundled installer.
+This public repository is the maintained customer skill home. The Builder CLI supplies existing-manifest validation and app operations; it is not a second skill distribution route and does not require a private checkout. Install the customer skill through the marketplace below, not an additional CLI-bundled installer.
 
 ## Install the plugin
 
@@ -31,17 +31,39 @@ Restart the host session after installation if needed. Ask explicitly for App Se
 
 These commands install the **agent plugin**, not the **Builder CLI**. They change the host's plugin configuration when the customer chooses to run them.
 
-## Builder CLI installation: placeholder
+## Install Builder CLI separately
 
-**CLI installation is a placeholder.** No TAR download URL, npm package name, or installer command is provided yet. Do not run a placeholder or install a guessed package. Use an already-installed approved `builder` CLI; otherwise obtain the approved distribution/instructions from the preview contact and stop deployment until prerequisites are met.
+Obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or your preview contact. The contact supplies preview access and an approved deployment target. Follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
 
-Local Node.js >=22, Git, GitHub CLI, authorized subscription, existing resource group, and approved location/connection settings are required. The preview contact supplies access and qualification; this repository does not supply onboarding or a list of qualified locations/platforms.
+Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. Its published SHA-256 checksum is available for integrity checking. Manual checksum verification is optional; an agent can compare the download automatically. A checksum mismatch must stop installation. If an approved asset is unavailable, ask the preview contact rather than guessing a version or download URL.
+
+The CLI 0.0.1 preview assets are the [portable CLI archive](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz) and its [SHA-256 checksum](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz.sha256).
+
+Install the downloaded local archive, with the user's approval:
+
+```shell
+npm install --global "<path-to-downloaded-file.tgz>"
+builder --version
+builder --help
+```
+
+Replace the path with the actual approved download. Do not extract the archive or install a guessed npm-registry package. npm registry access is still needed for JavaScript dependencies.
+
+The archive includes the portable analyzer, not the .NET runtime. A compatible .NET 10 runtime is required only for local `builder manifest` commands. Login, initialization, and deployment work without .NET. The analyzer's generated `Embr.BuildAnalyzer.runtimeconfig.json` specifies the required runtime; a .NET SDK is not required. An existing compatible SDK includes the runtime.
+
+Before local manifest commands, install the required runtime separately if needed and check:
+
+```shell
+dotnet --list-runtimes
+```
+
+Local Git and GitHub CLI, an authorized subscription, an existing resource group, and an approved location are also required for deployment. Missing prerequisites stop deployment; the plugin does not install or upgrade tooling automatically. The preview contact supplies access and qualification, not this public repository.
 
 The [canonical product docs](https://builder.appservice.azure.com/docs/) and [current feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) govern support, prerequisites, and limitations. The skill consults maintained docs first, uses bundled procedures, and checks installed CLI help for syntax. Public documentation does not change Private Preview access. Local code/manifest inspection can happen before Git initialization or account connection; cloud actions remain gated on readiness and their own scope.
 
 The [skill](../plugin/skills/app-service-builder/SKILL.md) includes self-contained [readiness](../plugin/skills/app-service-builder/references/prerequisites.md), [source](../plugin/skills/app-service-builder/references/source-and-manifest.md), [deployment](../plugin/skills/app-service-builder/references/deployment.md), and [operations](../plugin/skills/app-service-builder/references/operations.md) references. Unsupported or unqualified workflows must not be inferred from the existence of this plugin.
 
-Manifest proposal/generation/repair/validation is capability-gated: check installed CLI and command-specific help, including required flags. An approved CLI build with this capability and qualified OS/CPU packaging is still required; this package does not establish a release version or universal availability. Samples inform source layout and user choices, while the CLI renders and validates the actual manifest. If the capability is missing, read-only source inspection can help but must not become hand-written manifest generation or a replacement detector.
+The CLI validates an existing `builder.yaml` without creating or changing it. Use the manifest guide and selected sample for configuration guidance, and check installed command help before invocation. Local validation is optional and does not block ordinary app setup.
 
 ## Package layout and local checks
 
@@ -54,7 +76,7 @@ node --test scripts/validate-plugin.test.mjs
 node scripts/validate-plugin.mjs
 ```
 
-These offline checks validate the deliberately small manifest schema, required metadata, version agreement, contained relative paths, both entry points, the single skill's frontmatter, local Markdown links, bundled references, canonical product documentation destinations, and installation-placeholder guardrails. Focused safety assertions protect source preservation, read-only reconciliation, CLI commit selection, and capability-gated deterministic manifest guidance; they are not a semantic safety proof or new-CLI runtime smoke test. Negative tests exercise broken metadata, paths, references, documentation destinations, and unsafe edits. They do not run `builder`, fetch sample source, validate live doc content/service access, or prove a deployment works.
+These offline checks validate the deliberately small manifest schema, required metadata, version agreement, contained relative paths, both entry points, the single skill's frontmatter, local Markdown links, bundled references, canonical product documentation destinations, and approved-archive installation guardrails. Official release-asset links are allowed; other archive sources and automatic source-code downloads are rejected. Link-shape validation does not prove that an asset is published or its checksum matches: verify the actual download before advertising a specific release. Focused safety assertions protect source preservation, read-only reconciliation, CLI commit selection, variable-editing scope, and existing-manifest validation; they are not a semantic safety proof or CLI runtime smoke test. Negative tests exercise broken metadata, paths, references, documentation destinations, unsafe edits, and commands outside the shipped CLI. They do not run `builder`, fetch sample source, validate live doc content/service access, or prove a deployment works.
 
 If Claude Code is already available, `claude plugin validate ./plugin` and `claude plugin validate .` provide additional native manifest validation. Native discovery should be checked using isolated temporary host configuration, not by installing into a contributor's global configuration. Record the host/version and actual result in the PR; missing hosts or live preview checks remain explicit gaps.
 

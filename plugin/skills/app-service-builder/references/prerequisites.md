@@ -4,21 +4,47 @@ App Service Builder is a **Private Preview** for **development/test**, not produ
 
 Consult [Private Preview guidance](https://builder.appservice.azure.com/docs/resources/preview/) for access, prerequisites, support, and limitations; check [feature availability](https://builder.appservice.azure.com/docs/resources/feature-status/) before recommending a workflow. Verify command syntax against the [CLI reference](https://builder.appservice.azure.com/docs/reference/builder-cli/) and installed help. Report disagreements or unavailable docs rather than guessing or relaxing qualification.
 
-## CLI installation: placeholder
+## Install Builder CLI
 
-**CLI installation is a placeholder. No TAR URL, npm package name, or installer command is published by this plugin. Do not execute placeholder installation steps.** Use an already-installed approved `builder` CLI. If it is absent, stop deployment and obtain the approved distribution and instructions from the preview contact. Do not download a lookalike package or infer an installation path.
+Use an already-installed approved `builder` CLI when available. Otherwise obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or the preview contact and follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
 
-Require local Node.js >=22, Git, and GitHub CLI (`gh`). If a prerequisite is absent or too old, report it and stop deployment rather than installing or upgrading it automatically.
+Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. Manual checksum verification is optional for customers. When an agent downloads the CLI for a user, compare it with the provided published SHA-256 checksum before installing and stop on a mismatch. If an approved asset or trusted checksum cannot be found, ask the preview contact rather than guessing a version or download URL.
 
-The preview contact must supply authorization for the subscription and the approved location and connection settings. Use an **existing resource group**. This skill does not invent onboarding, regions, endpoints, platform qualifications, or commands for configuring preview connections.
+The CLI 0.0.1 preview assets are the [portable CLI archive](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz) and its [SHA-256 checksum](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz.sha256).
 
-## Manifest capability gate
+After approval to install the downloaded archive:
 
-The manifest workflow described in [source preparation](source-and-manifest.md#cli-owned-manifest-workflow) requires an approved CLI build with that capability. Its availability and OS/CPU package readiness are pending; do not invent a minimum released version or claim universal shipping support. Check `builder --help`, then `builder manifest --help` if listed, and the relevant `propose`, `generate`, `repair`, and `validate` command help before invocation. Verify flags as well as command names. Public docs remain support/availability authority; installed help is command syntax authority. Surface any mismatch rather than proceeding on assumptions.
+```shell
+npm install --global "<path-to-downloaded-file.tgz>"
+builder --version
+builder --help
+```
 
-If commands or flags are absent, explain that this workflow needs an approved capable CLI build and stop manifest generation/repair. Read-only app/sample inspection can still help; do not bypass deterministic rendering with hand-written YAML or a replacement framework detector. The native repository analyzer is supplied with a capable CLI on supported OS/CPU combinations; it does not require customer .NET or a separately installed analyzer. Missing native prerequisites/errors must be reported, not solved with guessed installers.
+Use the actual approved local file, not the placeholder path. Do not extract the archive, guess a registry package or download URL, or install/upgrade tooling automatically. npm still needs registry access for JavaScript dependencies.
 
-Proposal, rendering previews, repair previews, and plan validation are local. Only optional build validation executes repository build scripts; it needs separate execution approval. Neither mode proves preview runtime qualification or hosted success.
+A compatible .NET 10 runtime is required only for local `builder manifest` commands. Login, initialization, and deployment work without .NET. The analyzer is included in the archive and does not require a separate installation. Its generated `Embr.BuildAnalyzer.runtimeconfig.json` specifies the runtime requirement; a .NET SDK is not required.
+
+Before local manifest commands, keep the compatible runtime on PATH and inspect:
+
+```shell
+dotnet --list-runtimes
+```
+
+If the runtime is missing or incompatible, report the actual requirement and stop that local command rather than automatically installing a runtime or a different analyzer. This does not block ordinary CLI login, setup, or deployment.
+
+Require local Git and GitHub CLI (`gh`) for source operations. If deployment prerequisites are absent or too old, report them and stop deployment rather than installing or upgrading them automatically.
+
+The preview contact must supply authorization for the subscription and the approved location. Use an **existing resource group**. This skill does not invent onboarding, regions, endpoints, platform qualifications, or commands for configuring preview connections.
+
+## Local manifest validation
+
+Check `builder --help`, then `builder manifest --help`, and the relevant command help before invocation. The CLI checks an existing `builder.yaml`; it does not create or modify it. Inspect `builder manifest validate --help` for the supported path argument, `--json`, and optional `--build`.
+
+If validation or a flag is unavailable, report the installed CLI limitation rather than inventing a replacement command. Local validation is optional; it is not a prerequisite for app setup. See [manifest validation](source-and-manifest.md#validate-builderyaml) for the existing-file workflow.
+
+Public docs remain support/availability authority; installed help is command syntax authority. Surface any mismatch rather than proceeding on assumptions.
+
+Validation is local and read-only. Only optional build validation executes repository build scripts; it needs separate execution approval. Neither mode proves preview runtime qualification or hosted success.
 
 ## Read-only readiness checks
 
@@ -37,10 +63,10 @@ builder doctor --json
 The intended/selected account, verified identity, and actual target access are different checks. Do not request sign-in if the existing context is already correct. Preserve machine-wide account configuration: do not silently switch global CLI accounts or reuse another account's credential. Do not change tenants, subscriptions, or connections silently. If the confirmed management context needs authentication, consult help and use:
 
 ```shell
-builder login --tenant "<tenant-id>"
+builder login
 ```
 
-`builder login` without a tenant selector is also available; choose only with the user's intended tenant established. Recheck `builder account show` afterward.
+Use `--tenant` only when the user explicitly needs a specific Azure/Entra directory. It is an optional account selector, not a prerequisite for the normal sign-in flow. Recheck `builder account show` afterward.
 
 ## Source authorization is separate
 
@@ -56,4 +82,4 @@ Keep credentials out of chat, manifests, remote URLs, and logs. Inspect only cre
 
 Microsoft management sign-in and GitHub source access do not configure authentication for visitors to the deployed app. There is no current Builder CLI command for deployed-app authentication.
 
-Proceed only when the exact target, approved connection settings, account context, source access, and CLI diagnostics are ready. Never treat a missing prerequisite as a successful readiness check.
+Proceed only when the exact target, account context, source access, and CLI diagnostics are ready. Never treat a missing prerequisite as a successful readiness check.

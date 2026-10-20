@@ -20,7 +20,7 @@ Triage is not a delivery commitment or a response-time promise. An issue may rem
 
 Pull requests can improve this hub's instructions, public links, and feedback forms. Keep content suitable for public visibility and do not add internal links or unpublished product claims. Explain the customer-facing improvement in the pull request. Changes to form filenames, field IDs, labels, or headings must also update the [portal integration contract](docs/portal-feedback-integration.md).
 
-For agent-plugin changes, keep both host manifests and the shared skill tree consistent, preserve preview/readiness boundaries, and run the offline checks in [plugin contribution guidance](docs/agent-plugin.md#package-layout-and-local-checks). CLI installation remains a placeholder until an approved distribution is supplied; do not add guessed package names or download commands.
+For agent-plugin changes, keep both host manifests and the shared skill tree consistent, preserve preview/readiness boundaries, and run the offline checks in [plugin contribution guidance](docs/agent-plugin.md#package-layout-and-local-checks). Follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/): customers obtain an approved portable archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or their preview contact and install that local file with npm. Verify any release-asset URL and published checksum before adding the link to customer instructions. Keep the runtime prerequisite scoped to local manifest commands; do not add guessed registry packages, download URLs, or automatic installers.
 
 ## Contributor agreement and conduct
 
