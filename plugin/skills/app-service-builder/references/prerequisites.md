@@ -8,7 +8,7 @@ Consult [Private Preview guidance](https://builder.appservice.azure.com/docs/res
 
 Use an already-installed approved `builder` CLI when available. Otherwise obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or the preview contact and follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
 
-Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. When an agent downloads the CLI for a user, verify it automatically against the provided published SHA-256 checksum before installing and stop on a mismatch. Do not ask customers to calculate or compare checksums. If an approved asset or trusted checksum cannot be found, ask the preview contact rather than guessing a version or download URL.
+Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. When an agent downloads the CLI for a user, compare it with the provided published SHA-256 checksum before installing and stop on a mismatch. If an approved asset or trusted checksum cannot be found, ask the preview contact rather than guessing a version or download URL.
 
 The CLI 0.0.1 preview assets are the [portable CLI archive](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz) and its [SHA-256 checksum](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz.sha256).
 

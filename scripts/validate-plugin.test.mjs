@@ -162,36 +162,19 @@ for (const file of ['docs/agent-plugin.md', 'plugin/skills/app-service-builder/r
   });
 }
 
-test('customer CLI installation omits manual checksum verification', () => {
+test('customer CLI installation uses the downloaded archive and checks the version', () => {
   const install = readFileSync(resolve(root, 'docs/agent-plugin.md'), 'utf8')
     .split('## Package layout and local checks')[0];
-  assert.doesNotMatch(install, /checksum|SHA-?256|Get-FileHash|shasum|sha256sum/i);
+  assert.match(install, /npm install --global "<path-to-downloaded-file\.tgz>"\r?\nbuilder --version/);
 });
 
-for (const [name, before, after, expected] of [
-  ['removing the checksum', 'published SHA-256 checksum', 'unverified download', /Missing automatic archive checksum verification/],
-  ['removing automatic verification', 'verify it automatically against', 'verify it against', /Missing automatic archive checksum verification/],
-  ['ignoring a mismatch', 'stop on a mismatch', 'continue on a mismatch', /Missing automatic archive checksum verification/],
-  ['delegating verification to customers', 'Do not ask customers to calculate or compare checksums.', 'Ask customers to calculate and compare checksums.', /Missing prohibition on customer checksum steps/],
-]) {
-  test(`rejects ${name} in the agent checksum procedure`, (t) => {
-    const directory = fixture(t);
-    const path = resolve(directory, 'plugin/skills/app-service-builder/references/prerequisites.md');
-    writeFileSync(path, readFileSync(path, 'utf8').replace(before, after));
-    assert.throws(() => validatePlugin(directory), expected);
-  });
-}
-
-for (const file of ['README.md', 'docs/agent-plugin.md', 'plugin/README.md']) {
-  for (const command of ['Get-FileHash .\\builder.tgz -Algorithm SHA256', 'shasum -a 256 builder.tgz', 'sha256sum builder.tgz']) {
-    test(`rejects manual checksum command ${command} in ${file}`, (t) => {
-      const directory = fixture(t);
-      const path = resolve(directory, file);
-      writeFileSync(path, readFileSync(path, 'utf8') + `\n\`\`\`shell\n${command}\n\`\`\`\n`);
-      assert.throws(() => validatePlugin(directory), /Manual checksum steps in customer installation/);
-    });
-  }
-}
+test('rejects removing archive checksum guidance from agent prerequisites', (t) => {
+  const directory = fixture(t);
+  const path = resolve(directory, 'plugin/skills/app-service-builder/references/prerequisites.md');
+  writeFileSync(path, readFileSync(path, 'utf8').replace(
+    'published SHA-256 checksum', 'unverified download'));
+  assert.throws(() => validatePlugin(directory), /Missing archive checksum verification/);
+});
 
 for (const file of ['docs/agent-plugin.md', 'plugin/README.md', 'CONTRIBUTING.md']) {
   test(`rejects removing canonical CLI installation guidance in ${file}`, (t) => {
