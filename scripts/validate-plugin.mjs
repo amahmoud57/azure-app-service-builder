@@ -312,19 +312,23 @@ export function validatePlugin(root = repositoryRoot) {
     assert(content.includes(archiveInstallCommand) && content.includes('azure-builder-cli-<version>.tgz') &&
       /preview contact/.test(content), `Missing approved archive installation: ${path}`);
     assert(content.includes(`](${cliReleases})`), `Missing official CLI release source: ${path}`);
-    assert(content.includes('published SHA-256 checksum'), `Missing archive checksum verification: ${path}`);
-    assert(content.includes('Manual checksum verification is optional'),
-      `Missing optional manual checksum guidance: ${path}`);
   }
   const prereqs = readFileSync(resolve(skillRoot, 'references/prerequisites.md'), 'utf8');
   assert(/stop deployment/i.test(prereqs) && /already-installed approved/.test(prereqs),
     'Missing prerequisite stop/approved CLI guardrails');
+  assert(prereqs.includes('verify it automatically against') &&
+    prereqs.includes('published SHA-256 checksum') && prereqs.includes('stop on a mismatch'),
+  'Missing automatic archive checksum verification');
+  assert(prereqs.includes('Do not ask customers to calculate or compare checksums.'),
+    'Missing prohibition on customer checksum steps');
   checkGuidance(skillRoot);
   const install = readFileSync(resolve(root, 'docs/agent-plugin.md'), 'utf8');
   assert(/public repository is the maintained customer skill home/i.test(install),
     'Installation docs must identify public skill ownership');
   for (const path of ['README.md', 'docs/agent-plugin.md', 'plugin/README.md']) {
     const content = readFileSync(resolve(root, path), 'utf8');
+    assert(!/\b(?:Get-FileHash|shasum|sha256sum|manual checksum verification)\b/i.test(content),
+      `Manual checksum steps in customer installation: ${path}`);
     for (const host of ['copilot', 'claude']) {
       assert(content.includes(`${host} plugin marketplace add microsoft/azure-app-service-builder`) &&
         content.includes(`${host} plugin install builder@azure-app-service-builder`),

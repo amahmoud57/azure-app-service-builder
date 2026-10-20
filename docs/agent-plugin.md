@@ -35,9 +35,9 @@ These commands install the **agent plugin**, not the **Builder CLI**. They chang
 
 Obtain the approved portable `azure-builder-cli-<version>.tgz` archive from the [official CLI releases](https://github.com/microsoft/azure-app-service-builder/releases) or your preview contact. The contact supplies preview access and an approved deployment target. Follow the [Builder CLI quickstart](https://builder.appservice.azure.com/docs/quickstarts/builder-cli/). Use the same archive on Windows, Linux, and macOS with Node.js 22 or later, including npm.
 
-Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. Its published SHA-256 checksum is available for integrity checking. Manual checksum verification is optional; an agent can compare the download automatically. A checksum mismatch must stop installation. If an approved asset is unavailable, ask the preview contact rather than guessing a version or download URL.
+Use the CLI release asset, not GitHub's automatic source-code ZIP or tarball. If an approved asset is unavailable, ask the preview contact rather than guessing a version or download URL.
 
-The CLI 0.0.1 preview assets are the [portable CLI archive](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz) and its [SHA-256 checksum](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz.sha256).
+Download the [CLI 0.0.1 preview archive](https://github.com/microsoft/azure-app-service-builder/releases/download/builder-cli-v0.0.1-preview.1/azure-builder-cli-0.0.1.tgz).
 
 Install the downloaded local archive, with the user's approval:
 
